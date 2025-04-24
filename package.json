@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "charmingjs": "^0.0.17",
+    "d3": "^7.9.0",
+    "gl-matrix": "^3.4.3",
+    "prettier": "^3.5.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "apackjs": "^0.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
