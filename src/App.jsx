@@ -24,17 +24,48 @@ function toTree(codes) {
   return data;
 }
 
+function splitBy1And0(code) {
+  const codes = [];
+  let current = null;
+  let i = 0;
+  for (i = 0; i < code.length; i++) {
+    const digit = +code[i];
+    if (!current && digit !== 1) break;
+    else if (!current && digit === 1) current = "" + digit;
+    else if (digit === 0) current += "" + digit;
+    else {
+      codes.push(current);
+      current = digit === 1 ? "" + digit : null;
+      if (!current) break;
+    }
+  }
+  if (current) codes.push(current);
+  return [codes, code.slice(i)];
+}
+
 function tree(text) {
   const width = 480;
   const height = 480;
 
-  const code = text
+  text = text.trim();
+
+  const ascii = text
     .split("")
     .map((code) => code.charCodeAt(0))
     .join("");
 
-  const data = toTree(code);
+  const [flowers, tree] = splitBy1And0(ascii);
+
+  const data = toTree(tree);
   const root = d3.hierarchy(data);
+
+  const range = flowers.length * 10;
+  const middle = tree ? width * 0.25 : width / 2;
+
+  const flowerX = d3
+    .scalePoint()
+    .domain(flowers.map((_, i) => i))
+    .range([middle - range, middle + range]);
 
   const paths = [];
   const context = cm.mat().translate(width / 2, height - 20);
@@ -80,7 +111,7 @@ function tree(text) {
     styleBackground: "#eee",
     children: [
       cm.svg("text", {
-        textContent: code,
+        textContent: ascii,
         x: "100%",
         y: "100%",
         dy: "-10",
@@ -89,21 +120,41 @@ function tree(text) {
         fill: "black",
         fontSize: 16,
       }),
-      cm.svg("g", {
-        stroke: "black",
-        strokeWidth: 1.5,
-        children: [
-          cm.svg("path", paths, {
-            d: (d) => d.d,
-            transform: (d) => d.transform,
+      cm.svg("g", flowers, {
+        transform: (d, i) => `translate(${flowerX(i)}, ${height - 20})`,
+        children: (d) => [
+          cm.svg("circle", {
+            cx: 0,
+            cy: -100,
+            r: 10,
+            fill: "back",
+          }),
+          cm.svg("line", {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: -100,
+            stroke: "black",
+            strokeWidth: 1,
           }),
         ],
       }),
+      tree &&
+        cm.svg("g", {
+          stroke: "black",
+          strokeWidth: 1.5,
+          children: [
+            cm.svg("path", paths, {
+              d: (d) => d.d,
+              transform: (d) => d.transform,
+            }),
+          ],
+        }),
       cm.svg("g", {
         transform: `translate(${width - cellSize * text.split(" ").length - 10}, ${height - cellSize - 20})`,
         children: [apack.render(text, {})],
       }),
-    ],
+    ].filter(Boolean),
   });
 
   return svg;
@@ -209,7 +260,7 @@ function forest(names) {
 }
 
 function App() {
-  const [text, setText] = useState("Bairui Su");
+  const [text, setText] = useState("ego");
   const [names, setNames] = useState(JSON.parse(localStorage.getItem("names")) ?? []);
   const treeRef = useRef(null);
   const forestRef = useRef(null);
