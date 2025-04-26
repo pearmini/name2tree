@@ -159,7 +159,7 @@ function tree(text) {
         }),
       cm.svg("g", {
         transform: `translate(${width - cellSize * text.split(" ").length - 10}, ${height - cellSize - 20})`,
-        children: [apack.render(text, {})],
+        children: [apack.text(text, {})],
       }),
     ].filter(Boolean),
   });
