@@ -4,6 +4,10 @@ import * as apack from "apackjs";
 import {cm} from "./cm.js";
 import "./App.css";
 
+function random(seed, min, max) {
+  return d3.randomUniform.source(d3.randomLcg(seed))(min, max)();
+}
+
 function toTree(codes) {
   const data = {
     children: [],
@@ -69,9 +73,9 @@ function tree(text) {
 
   const paths = [];
   const context = cm.mat().translate(width / 2, height - 20);
-  branch(root, 160, 0, 10);
+  branch(root, 140, 0, 80);
 
-  function branch(node, len, rotation) {
+  function branch(node, len, rotation, angle) {
     context.push();
     context.rotate(rotation);
     paths.push({d: `M0,0L0,${-len}`, transform: context.transform()});
@@ -81,7 +85,7 @@ function tree(text) {
 
     const children = node.children ?? [];
 
-    const leaves = children.map((d) => d.leaves().length);
+    const leaves = children.map((d) => d.descendants().length);
     const stacked = [];
 
     let sum = 0;
@@ -90,14 +94,17 @@ function tree(text) {
       stacked.push(sum);
     }
 
-    const angle = 90 - node.depth * 30;
     const scaleAngle = d3.scaleLinear().domain([0, sum]).range([-angle, angle]);
 
     for (let i = 0, n = children.length; i < n; i++) {
       const child = children[i];
       const childRotation = scaleAngle(stacked[i]);
       const prevRotation = stacked[i - 1] ? scaleAngle(stacked[i - 1]) : -angle;
-      branch(child, len, (childRotation + prevRotation) / 2);
+      const diff = childRotation - prevRotation;
+      const {depth, height} = node;
+      const offsetRange = diff / 3;
+      const offset = random(depth * 10 + height * 1, -offsetRange, offsetRange);
+      branch(child, len, (childRotation + prevRotation) / 2 + offset, Math.min(80, diff));
     }
 
     context.pop();
@@ -260,7 +267,7 @@ function forest(names) {
 }
 
 function App() {
-  const [text, setText] = useState("ego");
+  const [text, setText] = useState("Bairui SU");
   const [names, setNames] = useState(JSON.parse(localStorage.getItem("names")) ?? []);
   const treeRef = useRef(null);
   const forestRef = useRef(null);
