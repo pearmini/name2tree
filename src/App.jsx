@@ -4,8 +4,28 @@ import * as apack from "apackjs";
 import {cm} from "./cm.js";
 import "./App.css";
 
-function random(seed, min, max) {
-  return d3.randomUniform.source(d3.randomLcg(seed))(min, max)();
+function reduceDenominator(numerator, denominator) {
+  const rec = (a, b) => (b ? rec(b, a % b) : a);
+  return denominator / rec(numerator, denominator);
+}
+
+function rose(r, n, d) {
+  const k = n / d;
+  const m = reduceDenominator(n, d);
+  const points = [];
+  for (let a = 0; a < Math.PI * 2 * m + 0.02; a += 0.02) {
+    const r1 = r * Math.cos(k * a);
+    const x = r1 * Math.cos(a);
+    const y = r1 * Math.sin(a);
+    points.push([x, y]);
+  }
+  return cm.svg("path", {
+    d: d3.line().curve(d3.curveCatmullRom)(points),
+    stroke: "black",
+    fill: "#eee",
+    // fillOpacity: 0.7,
+    // stroke: "#eee",
+  });
 }
 
 function toTree(codes) {
@@ -58,6 +78,16 @@ function tree(text) {
     .map((code) => code.charCodeAt(0))
     .join("");
 
+  const randomLcg = d3.randomUniform.source(d3.randomLcg(+ascii))();
+
+  function random(min, max) {
+    return min + (max - min) * randomLcg();
+  }
+
+  function randomInt(min, max) {
+    return Math.floor(random(min, max));
+  }
+
   const [flowers, tree] = splitBy1And0(ascii);
 
   const data = toTree(tree);
@@ -71,19 +101,21 @@ function tree(text) {
     .domain(flowers.map((_, i) => i))
     .range([middle - range, middle + range]);
 
+  const roses = [];
   const paths = [];
   const circles = [];
-  const context = cm.mat().translate(width / 2, height - 20);
-  branch(root, 140, 0, 80);
+  const initLen = 140;
+  const context = cm.mat().translate(width / 2, height * 0.618+ initLen);
+  branch(root, initLen, 0, 80);
 
-  function branch(node, len, rotation, angle) {
+  function branch(node, len, rotation, angle, roseCount = 0) {
     context.push();
     context.rotate(rotation);
     paths.push({d: `M0,0L0,${-len}`, transform: context.transform()});
 
     if (node.children) {
       context.translate(0, -len);
-      len *= 0.67;
+      len *= 0.618;
       const children = node.children;
 
       const leaves = children.map((d) => d.leaves().length);
@@ -96,24 +128,57 @@ function tree(text) {
       }
 
       const scaleAngle = d3.scaleLinear().domain([0, sum]).range([-angle, angle]);
+      const n = children.length;
 
-      for (let i = 0, n = children.length; i < n; i++) {
+      let mergeCount = -1;
+      let startIndex = -1;
+      let endIndex = -1;
+      if (n > 2 && node.children.every((d) => !d.children)) mergeCount = randomInt(3, Math.min(n, 10));
+
+      if (mergeCount > 0) {
+        startIndex = randomInt(0, n - mergeCount);
+        endIndex = startIndex + mergeCount - 1;
+      }
+
+      for (let i = 0; i < n; i++) {
+        if (i >= startIndex && i < endIndex) continue;
+        const isMerge = i === endIndex;
+        let prevIndex = isMerge ? startIndex : i - 1;
         const child = children[i];
         const childRotation = scaleAngle(stacked[i]);
-        const prevRotation = stacked[i - 1] ? scaleAngle(stacked[i - 1]) : -angle;
+        const prevRotation = stacked[prevIndex] ? scaleAngle(stacked[prevIndex]) : -angle;
         const diff = childRotation - prevRotation;
-        branch(child, len, (childRotation + prevRotation) / 2, Math.min(80, diff));
+        branch(child, len, (childRotation + prevRotation) / 2, Math.min(80, diff), isMerge ? mergeCount : 0);
       }
     } else {
-      const r = len / 10;
-      context.translate(0, -len - r);
-      len *= 0.67;
-      circles.push({
-        cx: 0,
-        cy: 0,
-        r,
-        transform: context.transform(),
-      });
+      // [n, d]
+      const roseByCount = {
+        3: [3, 1],
+        4: [4, 2],
+        5: [5, 3],
+        6: [3, 2],
+        7: [7, 3],
+        8: [4, 2],
+        9: [3, 2],
+        10: [5, 2],
+      };
+
+      if (roseCount > 0) {
+        const [n, d] = roseByCount[roseCount];
+        const r = Math.sqrt(roseCount * len);
+        context.translate(0, -len);
+        roses.push({r, n, d, transform: context.transform()});
+      } else {
+        const r = len / 12;
+        context.translate(0, -len - r);
+        len *= 0.67;
+        circles.push({
+          cx: 0,
+          cy: 0,
+          r,
+          transform: context.transform(),
+        });
+      }
     }
 
     context.pop();
@@ -126,16 +191,6 @@ function tree(text) {
     height,
     styleBackground: "#eee",
     children: [
-      cm.svg("text", {
-        textContent: ascii,
-        x: "100%",
-        y: "100%",
-        dy: "-10",
-        dx: "-10",
-        textAnchor: "end",
-        fill: "black",
-        fontSize: 16,
-      }),
       cm.svg("g", flowers, {
         transform: (d, i) => `translate(${flowerX(i)}, ${height - 20})`,
         children: (d) => [
@@ -174,14 +229,30 @@ function tree(text) {
               cx: 0,
               cy: 0,
               r: d.r,
-              fillOpacity: 0.7,
+              // fillOpacity: 0.7,
+              fill: "black",
               stroke: "black",
             }),
           ],
         }),
+      tree &&
+        cm.svg("g", roses, {
+          transform: (d) => d.transform,
+          children: (d) => [rose(d.r, d.n, d.d)],
+        }),
       cm.svg("g", {
-        transform: `translate(${width - cellSize * text.split(" ").length - 10}, ${height - cellSize - 20})`,
+        transform: `translate(${width - cellSize * text.split(" ").length - 20}, ${height - cellSize - 40})`,
         children: [apack.text(text, {})],
+      }),
+      cm.svg("text", {
+        textContent: ascii,
+        x: "100%",
+        y: "100%",
+        dy: "-25",
+        dx: "-20",
+        textAnchor: "end",
+        fill: "black",
+        fontSize: 16,
       }),
     ].filter(Boolean),
   });
@@ -274,15 +345,15 @@ function forest(names) {
     styleHeight: 800,
     styleBackground: "#eee",
     children: [
-      cm.svg("text", {
-        textContent: "The Nature of Code",
-        x: "50%",
-        dy: "1.5em",
-        fontSize: 20,
-        textAnchor: "middle",
-        fontFamily: "Impact",
-        fill: "black",
-      }),
+      // cm.svg("text", {
+      //   textContent: "The Nature of Code",
+      //   x: "50%",
+      //   dy: "1.5em",
+      //   fontSize: 20,
+      //   textAnchor: "middle",
+      //   fontFamily: "Impact",
+      //   fill: "black",
+      // }),
       forest,
     ],
   });
