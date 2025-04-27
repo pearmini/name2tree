@@ -404,6 +404,8 @@ function App() {
 
   const onClearLocalStorage = () => {
     setNames([]);
+    setCurrentPageIndex(0);
+    setCurrentNames([]);
   };
 
   const handleAddToForest = () => {
