@@ -23,8 +23,6 @@ function rose(r, n, d) {
     d: d3.line().curve(d3.curveCatmullRom)(points),
     stroke: "black",
     fill: "#eee",
-    // fillOpacity: 0.7,
-    // stroke: "#eee",
   });
 }
 
@@ -105,7 +103,8 @@ function tree(text) {
   const paths = [];
   const circles = [];
   const initLen = 140;
-  const context = cm.mat().translate(width / 2, height * 0.618+ initLen);
+  const baselineY = height * 0.618 + initLen;
+  const context = cm.mat().translate(width / 2, baselineY);
   branch(root, initLen, 0, 80);
 
   function branch(node, len, rotation, angle, roseCount = 0) {
@@ -160,7 +159,6 @@ function tree(text) {
         7: [7, 3],
         8: [4, 2],
         9: [3, 2],
-        10: [5, 2],
       };
 
       if (roseCount > 0) {
@@ -186,27 +184,29 @@ function tree(text) {
 
   const cellSize = 80;
 
+  const circlePath = (r) => {
+    const path = d3.path();
+    path.arc(0, 0, r, 0, Math.PI * 2);
+    return path.toString();
+  };
+
   const svg = cm.svg("svg", {
     width,
     height,
     styleBackground: "#eee",
     children: [
       cm.svg("g", flowers, {
-        transform: (d, i) => `translate(${flowerX(i)}, ${height - 20})`,
-        children: (d) => [
-          cm.svg("circle", {
-            cx: 0,
-            cy: -100,
-            r: 10,
-            fill: "back",
-          }),
-          cm.svg("line", {
-            x1: 0,
-            y1: 0,
-            x2: 0,
-            y2: -100,
+        transform: (d, i) => `translate(${flowerX(i)}, ${baselineY})`,
+        children: (d, i) => [
+          cm.svg("path", {
+            d: `M0,0L0,${-initLen * 0.618}`,
             stroke: "black",
-            strokeWidth: 1,
+            strokeWidth: 1.5,
+          }),
+          cm.svg("g", {
+            strokeWidth: 1.5,
+            transform: `translate(0, ${-initLen * 0.618})`,
+            children: [rose(12, 1, i + 2)],
           }),
         ],
       }),
@@ -225,11 +225,8 @@ function tree(text) {
         cm.svg("g", circles, {
           transform: (d) => d.transform,
           children: (d) => [
-            cm.svg("circle", {
-              cx: 0,
-              cy: 0,
-              r: d.r,
-              // fillOpacity: 0.7,
+            cm.svg("path", {
+              d: circlePath(d.r),
               fill: "black",
               stroke: "black",
             }),
