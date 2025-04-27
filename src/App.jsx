@@ -66,7 +66,7 @@ function splitBy1And0(code) {
   return [codes, code.slice(i)];
 }
 
-function tree(text) {
+function tree(text, {stroke = "black"} = {}) {
   const width = 480;
   const height = 480;
 
@@ -183,7 +183,15 @@ function tree(text) {
     context.pop();
   }
 
-  const cellSize = 80;
+  const wordLength = text.split(" ").length;
+  let cellSize = 80;
+  let totalLength = wordLength * cellSize + 40;
+  if (totalLength > width / 2) {
+    cellSize = (width / 2 - 40) / wordLength;
+    totalLength = wordLength * cellSize + 20;
+  } else {
+    totalLength -= 20;
+  }
 
   const circlePath = (r) => {
     const path = d3.path();
@@ -196,6 +204,16 @@ function tree(text) {
     height,
     styleBackground: backgroundColor,
     children: [
+      cm.svg("rect", {
+        x: 5,
+        y: 5,
+        class: "tree-bg",
+        width: width - 10,
+        height: height - 10,
+        stroke,
+        strokeWidth: 1.5,
+        fill: "transparent",
+      }),
       cm.svg("g", flowers, {
         transform: (d, i) => `translate(${flowerX(i)}, ${baselineY})`,
         children: (d, i) => [
@@ -249,18 +267,20 @@ function tree(text) {
           ],
         }),
       cm.svg("g", {
-        transform: `translate(${width - cellSize * text.split(" ").length - 20}, ${height - cellSize - 40})`,
-        children: [apack.text(text, {})],
+        transform: `translate(${width - totalLength}, ${height - cellSize - 35})`,
+        children: [apack.text(text, {cellSize})],
       }),
       cm.svg("text", {
+        id: "ascii",
         textContent: ascii,
         x: "100%",
         y: "100%",
-        dy: "-25",
+        dy: "-20",
         dx: "-20",
         textAnchor: "end",
         fill: "black",
-        fontSize: 16,
+        fontSize: 12,
+        fontFamily: "monospace",
       }),
     ].filter(Boolean),
   });
@@ -318,7 +338,7 @@ function forest(names, {selectedIndex} = {}) {
   }
 
   function hideCellStroke() {
-    d3.selectAll(".forest-cell").style("stroke", "none");
+    d3.selectAll(".tree-bg").style("stroke", "black");
   }
 
   return cm.svg("svg", {
@@ -333,10 +353,9 @@ function forest(names, {selectedIndex} = {}) {
         children: [
           cm.svg("g", cells, {
             transform: (d) => `translate(${d.x * 480}, ${d.y * 480})`,
-            children: (d) => tree(d.name),
+            children: (d, index) => tree(d.name, {stroke: index === selectedIndex ? "red" : "black"}),
           }),
           cm.svg("rect", cells, {
-            class: "forest-cell",
             width: 480 - 10 * 2,
             height: 480 - 10 * 2,
             x: (d) => d.x * 480 + 10,
@@ -344,7 +363,6 @@ function forest(names, {selectedIndex} = {}) {
             fill: "transparent",
             styleCursor: "pointer",
             strokeWidth: 2,
-            stroke: (d, index) => (index === selectedIndex ? "black" : "none"),
             onclick: (_, d) => to(current === center ? [d.x * 480 + 240, d.y * 480 + 240, 480] : center),
           }),
         ],
@@ -355,8 +373,8 @@ function forest(names, {selectedIndex} = {}) {
 
 function App() {
   const count = 16;
-  const [text, setText] = useState("Your Name");
-  const [names, setNames] = useState(JSON.parse(localStorage.getItem("names")) ?? []);
+  const [text, setText] = useState("");
+  const [names, setNames] = useState(JSON.parse(localStorage.getItem("names")) ?? ["Bairui SU"]);
   const treeRef = useRef(null);
   const forestRef = useRef(null);
   const forestContainerRef = useRef(null);
@@ -364,6 +382,7 @@ function App() {
   const [currentNames, setCurrentNames] = useState(getCurrentNames(names, currentPageIndex));
   const pageCount = Math.ceil(names.length / count);
   const [addIndex, setAddIndex] = useState(-1);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const buttonStyle = {
     fontFamily: "monospace",
@@ -376,7 +395,7 @@ function App() {
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
-      treeRef.current.appendChild(tree(text).render());
+      treeRef.current.appendChild(tree(text || "Your Name").render());
     }
   }, [text]);
 
@@ -409,12 +428,16 @@ function App() {
   };
 
   const handleAddToForest = () => {
-    const newNames = [text, ...names];
-    setNames(newNames);
-    setCurrentPageIndex(0);
-    setCurrentNames(getCurrentNames(newNames, 0));
-    setAddIndex(0);
-    forestContainerRef.current?.scrollIntoView({behavior: "smooth"});
+    if (!text) {
+      setErrorMessage("Name can't be empty.");
+    } else {
+      const newNames = [text, ...names];
+      setNames(newNames);
+      setCurrentPageIndex(0);
+      setCurrentNames(getCurrentNames(newNames, 0));
+      setAddIndex(0);
+      forestContainerRef.current?.scrollIntoView({behavior: "smooth"});
+    }
   };
 
   const handlePrev = () => {
@@ -431,12 +454,17 @@ function App() {
     }
   };
 
+  const handleInputChange = (e) => {
+    setText(e.target.value);
+    setErrorMessage("");
+  };
+
   function getCurrentNames(names, index) {
     return names.slice(index * count, (index + 1) * count);
   }
 
   return (
-    <div style={{backgroundColor}}>
+    <div style={{backgroundColor, fontFamily: "monospace"}}>
       <div
         style={{
           height: "100vh",
@@ -445,30 +473,50 @@ function App() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          // marginTop: "40px",
         }}
       >
         <div style={{fontFamily: "monospace", fontSize: "20px"}}>String2Tree</div>
         <p style={{fontFamily: "monospace", marginTop: "15px"}}>
           Procedurally converting a string to a tree. Bairui SU 2025
         </p>
-        <p style={{marginTop: "15px", marginBottom: "40px"}}>
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+        <div
+          style={{
+            marginTop: "15px",
+            marginBottom: "24px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <input
+              placeholder="Your Name"
+              value={text}
+              onChange={handleInputChange}
+              style={{
+                fontFamily: "monospace",
+                backgroundColor: backgroundColor,
+                border: "1px solid black",
+                borderRight: "none",
+                padding: "5px",
+              }}
+            />
+            <button onClick={handleAddToForest} style={buttonStyle}>
+              Add to forest
+            </button>
+          </div>
+          <p
             style={{
+              marginTop: "10px",
               fontFamily: "monospace",
-              backgroundColor: backgroundColor,
-              border: "1px solid black",
-              borderRight: "none",
-              padding: "5px",
+              fontStyle: "italic",
+              opacity: errorMessage ? 1 : 0,
             }}
-          />
-          <button onClick={handleAddToForest} style={buttonStyle}>
-            Add to forest
-          </button>
-        </p>
-        <div ref={treeRef} style={{border: "1px solid black"}}></div>
+          >
+            {errorMessage || "W"}
+          </p>
+        </div>
+        <div ref={treeRef}></div>
       </div>
       <div
         ref={forestContainerRef}
@@ -501,7 +549,8 @@ function App() {
             alignItems: "center",
           }}
         >
-          <div ref={forestRef}></div>
+          <div style={{fontSize: "20px", marginBottom: "15px"}}>Forest</div>
+          <div ref={forestRef} onClick={() => forestContainerRef.current?.scrollIntoView({behavior: "smooth"})}></div>
           <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "15px"}}>
             {pageCount > 1 && (
               <>
