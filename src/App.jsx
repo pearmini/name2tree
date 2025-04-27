@@ -72,6 +72,7 @@ function tree(text) {
     .range([middle - range, middle + range]);
 
   const paths = [];
+  const circles = [];
   const context = cm.mat().translate(width / 2, height - 20);
   branch(root, 140, 0, 80);
 
@@ -80,31 +81,39 @@ function tree(text) {
     context.rotate(rotation);
     paths.push({d: `M0,0L0,${-len}`, transform: context.transform()});
 
-    context.translate(0, -len);
-    len *= 0.67;
+    if (node.children) {
+      context.translate(0, -len);
+      len *= 0.67;
+      const children = node.children;
 
-    const children = node.children ?? [];
+      const leaves = children.map((d) => d.leaves().length);
+      const stacked = [];
 
-    const leaves = children.map((d) => d.descendants().length);
-    const stacked = [];
+      let sum = 0;
+      for (const length of leaves) {
+        sum += length;
+        stacked.push(sum);
+      }
 
-    let sum = 0;
-    for (const length of leaves) {
-      sum += length;
-      stacked.push(sum);
-    }
+      const scaleAngle = d3.scaleLinear().domain([0, sum]).range([-angle, angle]);
 
-    const scaleAngle = d3.scaleLinear().domain([0, sum]).range([-angle, angle]);
-
-    for (let i = 0, n = children.length; i < n; i++) {
-      const child = children[i];
-      const childRotation = scaleAngle(stacked[i]);
-      const prevRotation = stacked[i - 1] ? scaleAngle(stacked[i - 1]) : -angle;
-      const diff = childRotation - prevRotation;
-      const {depth, height} = node;
-      const offsetRange = diff / 3;
-      const offset = random(depth * 10 + height * 1, -offsetRange, offsetRange);
-      branch(child, len, (childRotation + prevRotation) / 2 + offset, Math.min(80, diff));
+      for (let i = 0, n = children.length; i < n; i++) {
+        const child = children[i];
+        const childRotation = scaleAngle(stacked[i]);
+        const prevRotation = stacked[i - 1] ? scaleAngle(stacked[i - 1]) : -angle;
+        const diff = childRotation - prevRotation;
+        branch(child, len, (childRotation + prevRotation) / 2, Math.min(80, diff));
+      }
+    } else {
+      const r = len / 10;
+      context.translate(0, -len - r);
+      len *= 0.67;
+      circles.push({
+        cx: 0,
+        cy: 0,
+        r,
+        transform: context.transform(),
+      });
     }
 
     context.pop();
@@ -154,6 +163,19 @@ function tree(text) {
             cm.svg("path", paths, {
               d: (d) => d.d,
               transform: (d) => d.transform,
+            }),
+          ],
+        }),
+      tree &&
+        cm.svg("g", circles, {
+          transform: (d) => d.transform,
+          children: (d) => [
+            cm.svg("circle", {
+              cx: 0,
+              cy: 0,
+              r: d.r,
+              fillOpacity: 0.7,
+              stroke: "black",
             }),
           ],
         }),
