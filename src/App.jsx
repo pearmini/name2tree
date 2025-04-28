@@ -359,7 +359,7 @@ function forest(names, {selectedIndex} = {}) {
     to(current === center ? viewports[index] : current === viewports[index] ? center : viewports[index]);
   }
 
-  const viewports = cells.map((d) => [d.x * 480 + 240, d.y * 480 + 240, (480 * width) / height]);
+  const viewports = cells.map((d) => [d.x * 480 + 240, d.y * 480 + 240, ((480 * width) / height) * 1.2]);
 
   return cm.svg("svg", {
     viewBox: `0 0 ${width} ${height}`,
