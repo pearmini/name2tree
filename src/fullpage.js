@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 
 function throttle(fn, delay) {
   let last = 0;
@@ -12,6 +12,8 @@ function throttle(fn, delay) {
 }
 
 export function useFullPage() {
+  const update = useRef(null);
+
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll(".section"));
 
@@ -44,7 +46,7 @@ export function useFullPage() {
       return div;
     });
 
-    function updateIndicators(selectedIndex) {
+    const updateIndicators = (update.current = (selectedIndex) => {
       dots.forEach((dot, index) => {
         if (index === selectedIndex) {
           dot.style.border = "0px solid #FEFAF1";
@@ -52,7 +54,7 @@ export function useFullPage() {
           dot.style.border = "4px solid #FEFAF1";
         }
       });
-    }
+    });
 
     document.body.appendChild(indicatorGroup);
 
@@ -80,4 +82,6 @@ export function useFullPage() {
       indicatorGroup.remove();
     };
   }, []);
+
+  return update;
 }

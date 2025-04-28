@@ -408,6 +408,8 @@ function App() {
     cursor: "pointer",
   };
 
+  const updateIndicators = useFullPage();
+
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
@@ -422,8 +424,6 @@ function App() {
       setSelectedIndex(-1);
     }
   }, [names]);
-
-  useFullPage();
 
   const onSaveToLocalStorage = () => {
     localStorage.setItem("names", JSON.stringify(names));
@@ -450,6 +450,7 @@ function App() {
       const newNames = [text, ...names];
       setNames(newNames);
       setSelectedIndex(0);
+      updateIndicators.current(1);
       forestContainerRef.current?.scrollIntoView({behavior: "smooth"});
     }
   };
