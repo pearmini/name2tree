@@ -13,6 +13,9 @@ function throttle(fn, delay) {
 
 export function useFullPage() {
   const update = useRef(null);
+  const index = useRef(0);
+  const setCurrentIndex = (selectedIndex) => update.current(selectedIndex);
+  const currentIndex = () => index.current;
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll(".section"));
@@ -54,6 +57,7 @@ export function useFullPage() {
           dot.style.border = "4px solid #FEFAF1";
         }
       });
+      index.current = selectedIndex;
     });
 
     document.body.appendChild(indicatorGroup);
@@ -83,5 +87,5 @@ export function useFullPage() {
     };
   }, []);
 
-  return update;
+  return [currentIndex, setCurrentIndex];
 }

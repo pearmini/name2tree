@@ -408,7 +408,7 @@ function App() {
     cursor: "pointer",
   };
 
-  const updateIndicators = useFullPage();
+  const [currentPageIndex, setCurrentPageIndex] = useFullPage();
 
   useEffect(() => {
     if (treeRef.current) {
@@ -425,11 +425,47 @@ function App() {
     }
   }, [names]);
 
-  const onSaveToLocalStorage = () => {
+  useEffect(() => {
+    // cmd + s: save to local storage
+    // cmd + d: download to file
+    // cmd + c: clear local storage
+    // cmd + z: remove the first name
+    // cmd + u: upload file
+    const keydown = (e) => {
+      if (e.metaKey && currentPageIndex() === 1) {
+        if (e.key === "s") {
+          e.preventDefault();
+          onSaveToLocalStorage(names);
+        } else if (e.key === "d") {
+          e.preventDefault();
+          onDownloadToFile(names);
+        } else if (e.key === "c") {
+          e.preventDefault();
+          onClearLocalStorage();
+        } else if (e.key === "z") {
+          e.preventDefault();
+          onRemoveName();
+        } else if (e.key === "u") {
+          e.preventDefault();
+          onUploadFile();
+        }
+      }
+    };
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
+  }, [names]);
+
+  const onSaveToLocalStorage = (names) => {
     localStorage.setItem("names", JSON.stringify(names));
+    alert("Saved to local storage.");
   };
 
-  const onDownloadToFile = () => {
+  const onRemoveName = () => {
+    setNames(names.slice(1));
+    alert("Removed the first name.");
+  };
+
+  const onDownloadToFile = (names) => {
     const string = JSON.stringify(names);
     const blob = new Blob([string], {type: "application/json"});
     const url = URL.createObjectURL(blob);
@@ -450,7 +486,7 @@ function App() {
       const newNames = [text, ...names];
       setNames(newNames);
       setSelectedIndex(0);
-      updateIndicators.current(1);
+      setCurrentPageIndex(1);
       forestContainerRef.current?.scrollIntoView({behavior: "smooth"});
     }
   };
@@ -458,6 +494,21 @@ function App() {
   const handleInputChange = (e) => {
     setText(e.target.value);
     setErrorMessage("");
+  };
+
+  const onUploadFile = () => {
+    const file = document.createElement("input");
+    file.type = "file";
+    file.onchange = (e) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const names = JSON.parse(e.target.result);
+        console.log(names);
+        setNames(names);
+      };
+      reader.readAsText(e.target.files[0]);
+    };
+    file.click();
   };
 
   return (
@@ -528,19 +579,6 @@ function App() {
           alignItems: "center",
         }}
       >
-        {new URLSearchParams(window.location.search).get("debug") === "true" && (
-          <div>
-            <button onClick={onClearLocalStorage} style={{...buttonStyle, marginRight: "10px"}}>
-              Clear
-            </button>
-            <button onClick={onSaveToLocalStorage} style={{...buttonStyle, marginRight: "10px"}}>
-              Save
-            </button>
-            <button onClick={onDownloadToFile} style={{...buttonStyle, marginRight: "10px"}}>
-              Download
-            </button>
-          </div>
-        )}
         <div ref={forestRef} onClick={() => forestRef.current.scrollIntoView({behavior: "smooth"})}></div>
       </div>
     </div>
