@@ -289,22 +289,35 @@ function tree(text, {stroke = "black"} = {}) {
 }
 
 function forest(names, {selectedIndex} = {}) {
+  const canvasWidth = window.innerWidth;
+  const canvasHeight = window.innerHeight;
+  const canvasAspect = canvasWidth / canvasHeight;
   const n = names.length;
-  const count = 4;
+  const cols = Math.ceil(Math.sqrt(canvasAspect * n)); // cols / rows = canvasAspect
+  const rows = Math.ceil(n / cols);
   const cells = [];
 
   for (let i = 0; i < n; i++) {
-    const x = i % count;
-    const y = Math.floor(i / count);
+    const x = i % cols;
+    const y = Math.floor(i / cols);
     cells.push({x, y, name: names[i]});
   }
 
-  const width = count * 480;
-  const height = width;
-  const styleWidth = window.innerHeight * (720 / 856);
-  const styleHeight = styleWidth;
+  const width = cols * 480;
+  const height = rows * 480;
+  let styleWidth;
+  let styleHeight;
 
-  const center = [width / 2, width / 2, width];
+  const padding = 20;
+  if (width / height > canvasAspect) {
+    styleWidth = canvasWidth - padding;
+    styleHeight = (styleWidth / width) * height;
+  } else {
+    styleHeight = canvasHeight - padding;
+    styleWidth = (styleHeight / height) * width;
+  }
+
+  const center = [width / 2, height / 2, width];
   const to = (end) => move(current, end);
 
   let current = center;
@@ -325,7 +338,7 @@ function forest(names, {selectedIndex} = {}) {
     const transform = (t) => {
       const view = interpolator(t);
       const k = width / view[2]; // scale
-      const translate = [width / 2 - view[0] * k, width / 2 - view[1] * k]; // translate
+      const translate = [width / 2 - view[0] * k, height / 2 - view[1] * k]; // translate
       return `translate(${translate}) scale(${k})`;
     };
 
@@ -340,6 +353,12 @@ function forest(names, {selectedIndex} = {}) {
   function hideCellStroke() {
     d3.selectAll(".tree-bg").style("stroke", "black");
   }
+
+  function handleViewportClick(_, d, index) {
+    to(current === center ? viewports[index] : current === viewports[index] ? center : viewports[index]);
+  }
+
+  const viewports = cells.map((d) => [d.x * 480 + 240, d.y * 480 + 240, (480 * width) / height]);
 
   return cm.svg("svg", {
     viewBox: `0 0 ${width} ${height}`,
@@ -363,7 +382,7 @@ function forest(names, {selectedIndex} = {}) {
             fill: "transparent",
             styleCursor: "pointer",
             strokeWidth: 2,
-            onclick: (_, d) => to(current === center ? [d.x * 480 + 240, d.y * 480 + 240, 480] : center),
+            onclick: handleViewportClick,
           }),
         ],
       }),
@@ -372,17 +391,13 @@ function forest(names, {selectedIndex} = {}) {
 }
 
 function App() {
-  const count = 16;
   const [text, setText] = useState("");
   const [names, setNames] = useState(JSON.parse(localStorage.getItem("names")) ?? ["Bairui SU"]);
   const treeRef = useRef(null);
   const forestRef = useRef(null);
   const forestContainerRef = useRef(null);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [currentNames, setCurrentNames] = useState(getCurrentNames(names, currentPageIndex));
-  const pageCount = Math.ceil(names.length / count);
-  const [addIndex, setAddIndex] = useState(-1);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const buttonStyle = {
     fontFamily: "monospace",
@@ -402,10 +417,10 @@ function App() {
   useEffect(() => {
     if (forestRef.current) {
       forestRef.current.innerHTML = "";
-      forestRef.current.appendChild(forest(currentNames, {selectedIndex: addIndex}).render());
-      setAddIndex(-1);
+      forestRef.current.appendChild(forest(names, {selectedIndex}).render());
+      setSelectedIndex(-1);
     }
-  }, [currentNames]);
+  }, [names]);
 
   const onSaveToLocalStorage = () => {
     localStorage.setItem("names", JSON.stringify(names));
@@ -423,8 +438,6 @@ function App() {
 
   const onClearLocalStorage = () => {
     setNames([]);
-    setCurrentPageIndex(0);
-    setCurrentNames([]);
   };
 
   const handleAddToForest = () => {
@@ -433,24 +446,8 @@ function App() {
     } else {
       const newNames = [text, ...names];
       setNames(newNames);
-      setCurrentPageIndex(0);
-      setCurrentNames(getCurrentNames(newNames, 0));
-      setAddIndex(0);
+      setSelectedIndex(0);
       forestContainerRef.current?.scrollIntoView({behavior: "smooth"});
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentPageIndex > 0) {
-      setCurrentPageIndex(currentPageIndex - 1);
-      setCurrentNames(getCurrentNames(names, currentPageIndex - 1));
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPageIndex < pageCount - 1) {
-      setCurrentPageIndex(currentPageIndex + 1);
-      setCurrentNames(getCurrentNames(names, currentPageIndex + 1));
     }
   };
 
@@ -458,10 +455,6 @@ function App() {
     setText(e.target.value);
     setErrorMessage("");
   };
-
-  function getCurrentNames(names, index) {
-    return names.slice(index * count, (index + 1) * count);
-  }
 
   return (
     <div style={{backgroundColor, fontFamily: "monospace"}}>
@@ -542,34 +535,7 @@ function App() {
             </button>
           </div>
         )}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <div style={{fontSize: "20px", marginBottom: "15px"}}>Forest</div>
-          <div ref={forestRef} onClick={() => forestContainerRef.current?.scrollIntoView({behavior: "smooth"})}></div>
-          <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "15px"}}>
-            {pageCount > 1 && (
-              <>
-                <div
-                  onClick={handlePrev}
-                  style={{...buttonStyle, marginRight: "10px", opacity: currentPageIndex === 0 ? 0.5 : 1}}
-                >
-                  Prev
-                </div>
-                <div
-                  onClick={handleNext}
-                  style={{...buttonStyle, opacity: currentPageIndex === pageCount - 1 ? 0.5 : 1}}
-                >
-                  Next
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        <div ref={forestRef} onClick={() => forestRef.current.scrollIntoView({behavior: "smooth"})}></div>
       </div>
     </div>
   );
