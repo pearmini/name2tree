@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import * as apack from "apackjs";
 import {cm} from "./cm.js";
 import "./App.css";
+import {useFullPage} from "./fullpage.js";
 
 const backgroundColor = "#FEFAF1";
 
@@ -308,7 +309,7 @@ function forest(names, {selectedIndex} = {}) {
   let styleWidth;
   let styleHeight;
 
-  const padding = 20;
+  const padding = 80;
   if (width / height > canvasAspect) {
     styleWidth = canvasWidth - padding;
     styleHeight = (styleWidth / width) * height;
@@ -407,6 +408,8 @@ function App() {
     cursor: "pointer",
   };
 
+  const updateIndicators = useFullPage();
+
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
@@ -447,6 +450,7 @@ function App() {
       const newNames = [text, ...names];
       setNames(newNames);
       setSelectedIndex(0);
+      updateIndicators.current(1);
       forestContainerRef.current?.scrollIntoView({behavior: "smooth"});
     }
   };
@@ -459,6 +463,7 @@ function App() {
   return (
     <div style={{backgroundColor, fontFamily: "monospace"}}>
       <div
+        className="section"
         style={{
           height: "100vh",
           width: "100%",
@@ -512,6 +517,7 @@ function App() {
         <div ref={treeRef}></div>
       </div>
       <div
+        className="section"
         ref={forestContainerRef}
         style={{
           height: "100vh",
