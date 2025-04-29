@@ -416,7 +416,7 @@ function forest(names, {selectedIndex} = {}) {
 }
 
 function initData() {
-  return Array.from(new Set([...JSON.parse(localStorage.getItem("names")), ...data]));
+  return Array.from(new Set([...JSON.parse(localStorage.getItem("names") || "[]"), ...data]));
 }
 
 function App() {
