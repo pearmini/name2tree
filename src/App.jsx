@@ -421,6 +421,7 @@ function App() {
   const forestContainerRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
 
   const buttonStyle = {
     fontFamily: "monospace",
@@ -454,6 +455,7 @@ function App() {
     // cmd + z: remove the first name
     // cmd + u: upload file
     const keydown = (e) => {
+      if (!isAdmin) return;
       if (e.metaKey && currentPageIndex() === 1) {
         if (e.key === "s") {
           e.preventDefault();
@@ -570,14 +572,14 @@ function App() {
                 border: "1px solid black",
                 padding: "5px",
                 width: "250px",
-                borderRight: "none",
+                borderRight: isAdmin && "none",
               }}
             />
-            <button onClick={handleAddToForest} style={{...buttonStyle, 
-           
-              }}>
-              Share to forest
-            </button>
+            {isAdmin && (
+              <button onClick={handleAddToForest} style={{...buttonStyle}}>
+                Share to forest
+              </button>
+            )}
           </div>
           <p
             style={{
