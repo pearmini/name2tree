@@ -184,21 +184,46 @@ function tree(text, {stroke = "black"} = {}) {
     context.pop();
   }
 
-  const wordLength = text.split(" ").length;
-  let cellSize = 80;
-  let totalLength = wordLength * cellSize + 40;
-  if (totalLength > width / 2) {
-    cellSize = (width / 2 - 40) / wordLength;
-    totalLength = wordLength * cellSize + 20;
-  } else {
-    totalLength -= 20;
-  }
-
   const circlePath = (r) => {
     const path = d3.path();
     path.arc(0, 0, r, 0, Math.PI * 2);
     return path.toString();
   };
+
+  let textNode = null;
+
+  try {
+    const wordLength = text.split(" ").length;
+    if (wordLength > 4) {
+      throw new Error("Too many words");
+    }
+
+    let cellSize = 80;
+    let totalLength = wordLength * cellSize + 40;
+    if (totalLength > width / 2) {
+      cellSize = (width / 2 - 40) / wordLength;
+      totalLength = wordLength * cellSize + 20;
+    } else {
+      totalLength -= 20;
+    }
+
+    textNode = cm.svg("g", {
+      transform: `translate(${width - totalLength}, ${height - cellSize - 35})`,
+      children: [apack.text(text, {cellSize})],
+    });
+  } catch (e) {
+    textNode = cm.svg("text", {
+      textContent: text,
+      x: "100%",
+      y: "100%",
+      dy: "-40",
+      dx: "-20",
+      textAnchor: "end",
+      fill: "black",
+      fontSize: 16,
+      fontFamily: "monospace",
+    });
+  }
 
   const svg = cm.svg("svg", {
     width,
@@ -267,10 +292,7 @@ function tree(text, {stroke = "black"} = {}) {
             }),
           ],
         }),
-      cm.svg("g", {
-        transform: `translate(${width - totalLength}, ${height - cellSize - 35})`,
-        children: [apack.text(text, {cellSize})],
-      }),
+      textNode,
       cm.svg("text", {
         id: "ascii",
         textContent: ascii,
@@ -530,8 +552,8 @@ function App() {
         </p>
         <div
           style={{
-            marginTop: "15px",
-            marginBottom: "24px",
+            marginTop: "25px",
+            marginBottom: "10px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -539,19 +561,22 @@ function App() {
         >
           <div>
             <input
-              placeholder="Your Name"
+              placeholder="Names, Words, Sentences..."
               value={text}
               onChange={handleInputChange}
               style={{
                 fontFamily: "monospace",
                 backgroundColor: backgroundColor,
                 border: "1px solid black",
-                borderRight: "none",
                 padding: "5px",
+                width: "250px",
+                borderRight: "none",
               }}
             />
-            <button onClick={handleAddToForest} style={buttonStyle}>
-              Add to forest
+            <button onClick={handleAddToForest} style={{...buttonStyle, 
+           
+              }}>
+              Share to forest
             </button>
           </div>
           <p
