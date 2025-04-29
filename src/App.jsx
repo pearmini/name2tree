@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import * as apack from "apackjs";
 import {cm} from "./cm.js";
 import "./App.css";
+import {measureText} from "./text.js";
 import {useFullPage} from "./fullpage.js";
 
 const backgroundColor = "#FEFAF1";
@@ -421,6 +422,7 @@ function App() {
   const forestContainerRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const inputRef = useRef(null);
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
 
   const buttonStyle = {
@@ -447,6 +449,18 @@ function App() {
       setSelectedIndex(-1);
     }
   }, [names]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      updateInputWidth(inputRef.current, text);
+    }
+  }, [text]);
 
   useEffect(() => {
     // cmd + s: save to local storage
@@ -516,8 +530,16 @@ function App() {
   };
 
   const handleInputChange = (e) => {
-    setText(e.target.value);
+    const value = e.target.value;
+    setText(value);
     setErrorMessage("");
+    updateInputWidth(e.target, value);
+  };
+
+  const updateInputWidth = (input, value) => {
+    const text = value.length ? value : "Names, Words, Sentences...";
+    const {width} = measureText(text, {fontSize: "14px", fontFamily: "monospace"});
+    input.style.width = `${width + 20}px`;
   };
 
   const onUploadFile = () => {
@@ -545,54 +567,77 @@ function App() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
         }}
       >
-        <div style={{fontFamily: "monospace", fontSize: "20px"}}>String2Tree</div>
-        <p style={{fontFamily: "monospace", marginTop: "15px"}}>
-          Procedurally converting a string to a tree. Bairui SU 2025
-        </p>
-        <div
+        <nav
           style={{
-            marginTop: "25px",
-            marginBottom: "10px",
+            width: "100%",
+            padding: "20px",
+            borderBottom: "1px solid black",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            gap: "10px",
           }}
         >
-          <div>
-            <input
-              placeholder="Names, Words, Sentences..."
-              value={text}
-              onChange={handleInputChange}
-              style={{
-                fontFamily: "monospace",
-                backgroundColor: backgroundColor,
-                border: "1px solid black",
-                padding: "5px",
-                width: "250px",
-                borderRight: isAdmin && "none",
-              }}
-            />
-            {isAdmin && (
-              <button onClick={handleAddToForest} style={{...buttonStyle}}>
-                Share to forest
-              </button>
-            )}
-          </div>
-          <p
+          <div style={{fontFamily: "monospace", fontSize: "20px"}}>String2Tree</div>
+          <p style={{fontFamily: "monospace", margin: 0}}>Procedurally converting a string to a tree. Bairui SU 2025</p>
+        </nav>
+        <div
+          style={{
+            height: "calc(100vh - 100px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingBottom: "100px",
+          }}
+        >
+          <div
             style={{
-              marginTop: "10px",
-              fontFamily: "monospace",
-              fontStyle: "italic",
-              opacity: errorMessage ? 1 : 0,
+              marginTop: "25px",
+              marginBottom: "10px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            {errorMessage || "W"}
-          </p>
+            <div>
+              <input
+                ref={inputRef}
+                className="input"
+                placeholder="Names, Words, Sentences..."
+                value={text}
+                onChange={handleInputChange}
+                style={{
+                  fontFamily: "monospace",
+                  backgroundColor: backgroundColor,
+                  border: "none",
+                  padding: "5px",
+                  width: "auto",
+                  fontSize: "14px",
+                }}
+              />
+              {isAdmin && text && (
+                <button onClick={handleAddToForest} style={{...buttonStyle}}>
+                  Share to forest
+                </button>
+              )}
+            </div>
+            <p
+              style={{
+                marginTop: "10px",
+                fontFamily: "monospace",
+                fontStyle: "italic",
+                opacity: errorMessage ? 1 : 0,
+              }}
+            >
+              {errorMessage || "W"}
+            </p>
+          </div>
+          {text && <div ref={treeRef}></div>}
         </div>
-        <div ref={treeRef}></div>
       </div>
       <div
         className="section"
