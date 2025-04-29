@@ -493,6 +493,15 @@ function App() {
     return () => window.removeEventListener("keydown", keydown);
   }, [names]);
 
+  useEffect(() => {
+    const onclick = (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      if (currentPageIndex() === 0) inputRef.current.focus();
+    };
+    window.addEventListener("click", onclick);
+    return () => window.removeEventListener("click", onclick);
+  }, []);
+
   const onSaveToLocalStorage = (names) => {
     localStorage.setItem("names", JSON.stringify(names));
     alert("Saved to local storage.");
@@ -636,7 +645,7 @@ function App() {
               {errorMessage || "W"}
             </p>
           </div>
-          {text && <div ref={treeRef}></div>}
+          <div ref={treeRef}></div>
         </div>
       </div>
       <div
