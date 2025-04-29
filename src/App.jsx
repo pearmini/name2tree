@@ -4,6 +4,7 @@ import * as apack from "apackjs";
 import {cm} from "./cm.js";
 import "./App.css";
 import {useFullPage} from "./fullpage.js";
+import data from "./names.json";
 
 const backgroundColor = "#FEFAF1";
 
@@ -413,9 +414,13 @@ function forest(names, {selectedIndex} = {}) {
   });
 }
 
+function initData() {
+  return Array.from(new Set([...JSON.parse(localStorage.getItem("names")), ...data]));
+}
+
 function App() {
   const [text, setText] = useState("");
-  const [names, setNames] = useState(JSON.parse(localStorage.getItem("names")) ?? ["Bairui SU"]);
+  const [names, setNames] = useState(initData());
   const treeRef = useRef(null);
   const forestRef = useRef(null);
   const forestContainerRef = useRef(null);
