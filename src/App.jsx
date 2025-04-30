@@ -596,8 +596,10 @@ function App() {
             gap: "10px",
           }}
         >
-          <div style={{fontFamily: "monospace", fontSize: "20px"}}>String2Tree</div>
-          <p style={{fontFamily: "monospace", margin: 0}}>Procedurally converting a string to a tree. Bairui SU 2025</p>
+          <div style={{fontFamily: "monospace", fontSize: "20px"}}>Find the Tree in Your Name</div>
+          <p style={{fontFamily: "monospace", margin: 0}}>
+            Your digital identity, visualized as nature. Bairui SU 2025
+          </p>
         </nav>
         <div
           style={{
@@ -611,6 +613,7 @@ function App() {
         >
           <div
             style={{
+              marginTop: "24px",
               marginBottom: "10px",
               display: "flex",
               flexDirection: "column",
