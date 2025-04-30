@@ -420,12 +420,13 @@ function initData() {
 }
 
 function App() {
+  const PLACEHOLDER = "Type your name or nickname...";
   const [text, setText] = useState("");
   const [names, setNames] = useState(initData());
   const treeRef = useRef(null);
   const forestRef = useRef(null);
   const forestContainerRef = useRef(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  // const [errorMessage, setErrorMessage] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef(null);
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
@@ -533,7 +534,7 @@ function App() {
 
   const handleAddToForest = () => {
     if (!text) {
-      setErrorMessage("Name can't be empty.");
+      // setErrorMessage("Name can't be empty.");
     } else {
       const newNames = [text, ...names];
       setNames(newNames);
@@ -546,12 +547,12 @@ function App() {
   const handleInputChange = (e) => {
     const value = e.target.value;
     setText(value);
-    setErrorMessage("");
+    // setErrorMessage("");
     updateInputWidth(e.target, value);
   };
 
   const updateInputWidth = (input, value) => {
-    const text = value.length ? value : "Names, Words, Sentences...";
+    const text = value.length ? value : PLACEHOLDER;
     const {width} = measureText(text, {fontSize: "14px", fontFamily: "monospace"});
     input.style.width = `${width + 20}px`;
   };
@@ -610,7 +611,6 @@ function App() {
         >
           <div
             style={{
-              marginTop: "25px",
               marginBottom: "10px",
               display: "flex",
               flexDirection: "column",
@@ -621,7 +621,7 @@ function App() {
               <input
                 ref={inputRef}
                 className="input"
-                placeholder="Names, Words, Sentences..."
+                placeholder={PLACEHOLDER}
                 value={text}
                 onChange={handleInputChange}
                 style={{
@@ -633,13 +633,8 @@ function App() {
                   fontSize: "14px",
                 }}
               />
-              {isAdmin && text && (
-                <button onClick={handleAddToForest} style={{...buttonStyle}}>
-                  Share to forest
-                </button>
-              )}
             </div>
-            <p
+            {/* <p
               style={{
                 marginTop: "10px",
                 fontFamily: "monospace",
@@ -648,9 +643,22 @@ function App() {
               }}
             >
               {errorMessage || "W"}
-            </p>
+            </p> */}
           </div>
           <div ref={treeRef}></div>
+          <button
+            onClick={handleAddToForest}
+            style={{
+              ...buttonStyle,
+              marginTop: "24px",
+              /* Occupy space when text is empty */
+              visibility: isAdmin && text ? "visible" : "hidden",
+              /* Not interactive when text is empty */
+              pointerEvents: isAdmin && text ? "auto" : "none",
+            }}
+          >
+            Share to forest
+          </button>
         </div>
       </div>
       <div
@@ -665,6 +673,7 @@ function App() {
           alignItems: "center",
         }}
       >
+        <p style={{fontSize: "12px", marginBottom: "10px"}}>Click to zoom in/out/navigate</p>
         <div ref={forestRef} onClick={() => forestRef.current.scrollIntoView({behavior: "smooth"})}></div>
       </div>
     </div>
