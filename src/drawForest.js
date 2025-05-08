@@ -66,7 +66,7 @@ export function forest(names, {selectedIndex} = {}) {
   }
 
   function hideCellStroke() {
-    d3.selectAll(".tree-bg").style("stroke", "black");
+    d3.selectAll(".tree-bg").style("stroke", "none");
   }
 
   function handleViewportClick(_, d, index) {
@@ -90,7 +90,8 @@ export function forest(names, {selectedIndex} = {}) {
             children: (d, index) =>
               tree(d.name, {
                 stroke: index === selectedIndex ? "red" : "black",
-                grid: true,
+                grid: index === selectedIndex,
+                padding: 0,
               }),
           }),
           cm.svg("rect", cells, {
