@@ -16,8 +16,9 @@ function initData() {
 function App() {
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
   const [page, setPage] = useState("tree");
+  const [text, setText] = useState("");
   const [names, setNames] = useState(initData());
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   function onHome() {
     setPage("tree");
@@ -49,7 +50,7 @@ function App() {
         fontFamily: "monospace",
       }}
     >
-      {page === "tree" && <Tree isAdmin={isAdmin} onAdd={onAdd} />}
+      {page === "tree" && <Tree isAdmin={isAdmin} onAdd={onAdd} text={text} setText={setText} />}
       {page === "forest" && (
         <Forest
           isAdmin={isAdmin}

@@ -63,7 +63,7 @@ function splitBy1And0(code) {
   return [codes, code.slice(i)];
 }
 
-export function tree(text, {stroke = "black", grid = false} = {}) {
+export function tree(text, {stroke = "black", grid = false, padding = 20} = {}) {
   const width = 480;
   const height = 480;
 
@@ -195,16 +195,17 @@ export function tree(text, {stroke = "black", grid = false} = {}) {
     }
 
     let cellSize = 80;
-    let totalLength = wordLength * cellSize + 40;
+    const padding = 20;
+    let totalLength = wordLength * cellSize + padding * 2;
     if (totalLength > width / 2) {
-      cellSize = (width / 2 - 40) / wordLength;
-      totalLength = wordLength * cellSize + 20;
+      cellSize = (width / 2 - padding * 2) / wordLength;
+      totalLength = wordLength * cellSize + padding;
     } else {
-      totalLength -= 20;
+      totalLength -= padding;
     }
 
     textNode = cm.svg("g", {
-      transform: `translate(${width - totalLength}, ${height - cellSize - 35})`,
+      transform: `translate(${width - totalLength}, ${baselineY - cellSize - padding})`,
       children: [apack.text(text, {cellSize})],
     });
   } catch (e) {
@@ -228,11 +229,11 @@ export function tree(text, {stroke = "black", grid = false} = {}) {
     children: [
       grid &&
         cm.svg("rect", {
-          x: 5,
-          y: 5,
+          x: 0,
+          y: 0,
           class: "tree-bg",
-          width: width - 10,
-          height: height - 10,
+          width: width,
+          height: height,
           stroke,
           strokeWidth: 1.5,
           fill: "transparent",
@@ -290,6 +291,11 @@ export function tree(text, {stroke = "black", grid = false} = {}) {
           ],
         }),
       textNode,
+      cm.svg("path", {
+        d: `M${padding},${baselineY}L${width - padding},${baselineY}`,
+        stroke: "black",
+        strokeWidth: 1.5,
+      }),
       // cm.svg("text", {
       //   id: "ascii",
       //   textContent: ascii,

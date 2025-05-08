@@ -4,10 +4,9 @@ import {tree} from "./drawTree.js";
 import {measureText} from "./text.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 
-export function Tree({isAdmin, onAdd}) {
+export function Tree({isAdmin, onAdd, text, setText}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
-  const [text, setText] = useState("");
   const treeRef = useRef(null);
   const inputRef = useRef(null);
   const [tooltip, setTooltip] = useState("");
@@ -48,7 +47,7 @@ export function Tree({isAdmin, onAdd}) {
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
-      treeRef.current.appendChild(tree(text || DEFAULT_TEXT, {grid: true}).render());
+      treeRef.current.appendChild(tree(text || DEFAULT_TEXT, {grid: false}).render());
     }
   }, [text]);
 

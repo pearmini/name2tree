@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from "react";
+import {useEffect, useRef} from "react";
 import {forest} from "./drawForest.js";
 
 export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedIndex}) {
@@ -27,6 +27,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
 
   const onClearLocalStorage = () => {
     setNames([]);
+    alert("Cleared local storage.");
   };
 
   const onUploadFile = () => {
@@ -45,6 +46,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   };
 
   useEffect(() => {
+    console.log(isAdmin);
     // cmd + s: save to local storage
     // cmd + d: download to file
     // cmd + c: clear local storage
@@ -52,23 +54,21 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
     // cmd + u: upload file
     const keydown = (e) => {
       if (!isAdmin) return;
-      if (e.metaKey && currentPageIndex() === 1) {
-        if (e.key === "s") {
-          e.preventDefault();
-          onSaveToLocalStorage(names);
-        } else if (e.key === "d") {
-          e.preventDefault();
-          onDownloadToFile(names);
-        } else if (e.key === "c") {
-          e.preventDefault();
-          onClearLocalStorage();
-        } else if (e.key === "z") {
-          e.preventDefault();
-          onRemoveName();
-        } else if (e.key === "u") {
-          e.preventDefault();
-          onUploadFile();
-        }
+      if (e.key === "s") {
+        e.preventDefault();
+        onSaveToLocalStorage(names);
+      } else if (e.key === "d") {
+        e.preventDefault();
+        onDownloadToFile(names);
+      } else if (e.key === "c") {
+        e.preventDefault();
+        onClearLocalStorage();
+      } else if (e.key === "z") {
+        e.preventDefault();
+        onRemoveName();
+      } else if (e.key === "u") {
+        e.preventDefault();
+        onUploadFile();
       }
     };
     window.addEventListener("keydown", keydown);
