@@ -8,7 +8,7 @@ export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave}) {
   useEffect(() => {
     if (ref.current) {
       ref.current.innerHTML = "";
-      const svg = apack.text(text, {cellSize}).render();
+      const svg = apack.text(text, {cellSize, word: {strokeWidth: 1.5}}).render();
       svg.style.backgroundColor = BACKGROUND_COLOR;
       ref.current.appendChild(svg);
     }

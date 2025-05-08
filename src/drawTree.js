@@ -206,7 +206,7 @@ export function tree(text, {stroke = "black", grid = false, padding = 20} = {}) 
 
     textNode = cm.svg("g", {
       transform: `translate(${width - totalLength}, ${baselineY - cellSize - padding})`,
-      children: [apack.text(text, {cellSize})],
+      children: [apack.text(text, {cellSize, word: {strokeWidth: 1.5}})],
     });
   } catch (e) {
     textNode = cm.svg("text", {
