@@ -5,6 +5,7 @@ import {APack} from "./APack.jsx";
 import {Writing} from "./Writing.jsx";
 import {About} from "./About.jsx";
 import {BACKGROUND_COLOR} from "./constants.js";
+import {Download} from "./Download.jsx";
 
 import data from "./names.json";
 import "./App.css";
@@ -15,6 +16,11 @@ function initData() {
 
 function App() {
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
+  const qrCodeText = new URLSearchParams(window.location.search).get("text");
+
+  if (qrCodeText) {
+    return <Download text={qrCodeText} />;
+  }
 
   const [page, setPage] = useState("tree");
   const [text, setText] = useState("");
