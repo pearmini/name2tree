@@ -15,6 +15,7 @@ function initData() {
 
 function App() {
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
+
   const [page, setPage] = useState("tree");
   const [text, setText] = useState("");
   const [names, setNames] = useState(initData());
@@ -29,7 +30,7 @@ function App() {
   }
 
   function onWriting() {
-    setPage("writing");
+    setPage("write");
   }
 
   function onAbout() {
@@ -43,6 +44,10 @@ function App() {
     setPage("forest");
   }
 
+  function onWrite() {
+    setPage("write");
+  }
+
   return (
     <div
       style={{
@@ -50,7 +55,7 @@ function App() {
         fontFamily: "monospace",
       }}
     >
-      {page === "tree" && <Tree isAdmin={isAdmin} onAdd={onAdd} text={text} setText={setText} />}
+      {page === "tree" && <Tree isAdmin={isAdmin} onAdd={onAdd} text={text} setText={setText} onWrite={onWrite} />}
       {page === "forest" && (
         <Forest
           isAdmin={isAdmin}
@@ -61,7 +66,7 @@ function App() {
           setSelectedIndex={setSelectedIndex}
         />
       )}
-      {page === "writing" && <Writing isAdmin={isAdmin} />}
+      {page === "write" && <Writing isAdmin={isAdmin} />}
       {page === "about" && <About isAdmin={isAdmin} />}
       <div
         style={{
@@ -79,7 +84,7 @@ function App() {
         {page === "tree" ? (
           <>
             <APack text="Forest" cellSize={50} onClick={onForest} />
-            <APack text="Writing" cellSize={50} onClick={onWriting} />
+            <APack text="Write" cellSize={50} onClick={onWriting} />
             <APack text="About" cellSize={50} onClick={onAbout} />
           </>
         ) : (

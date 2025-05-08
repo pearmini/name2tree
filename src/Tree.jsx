@@ -4,7 +4,7 @@ import {tree} from "./drawTree.js";
 import {measureText} from "./text.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 
-export function Tree({isAdmin, onAdd, text, setText}) {
+export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
   const treeRef = useRef(null);
@@ -27,7 +27,7 @@ export function Tree({isAdmin, onAdd, text, setText}) {
     input.style.width = `${width + 20}px`;
   };
 
-  const onDownload = () => {
+  const handleDownload = () => {
     // const string = JSON.stringify(names);
     // const blob = new Blob([string], {type: "application/json"});
     // const url = URL.createObjectURL(blob);
@@ -103,18 +103,27 @@ export function Tree({isAdmin, onAdd, text, setText}) {
       <div
         style={{display: "flex", gap: "10px", marginTop: "20px", visibility: isAdmin && text ? "visible" : "hidden"}}
       >
-        <APack
-          text="+"
-          cellSize={20}
-          onClick={handleAdd}
-          onMouseEnter={() => setTooltip("Add to Public Forest Archive")}
-          onMouseLeave={() => setTooltip("")}
-        />
+        {isAdmin && (
+          <APack
+            text="+"
+            cellSize={20}
+            onClick={handleAdd}
+            onMouseEnter={() => setTooltip("Add to the Public Forest Archive")}
+            onMouseLeave={() => setTooltip("")}
+          />
+        )}
         <APack
           text="Iv"
           cellSize={20}
-          onClick={onDownload}
+          onClick={handleDownload}
           onMouseEnter={() => setTooltip("Scan the QR Code to Download")}
+          onMouseLeave={() => setTooltip("")}
+        />
+        <APack
+          text="A"
+          cellSize={20}
+          onClick={onWrite}
+          onMouseEnter={() => setTooltip("Write in the Signature Style Above")}
           onMouseLeave={() => setTooltip("")}
         />
       </div>
