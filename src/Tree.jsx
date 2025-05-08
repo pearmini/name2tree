@@ -3,6 +3,8 @@ import {APack} from "./APack.jsx";
 import {tree} from "./drawTree.js";
 import {measureText} from "./text.js";
 import {BACKGROUND_COLOR} from "./constants.js";
+import {AwesomeQRCode} from "@awesomeqr/react";
+import QRCODE from "./qrcode.png";
 
 export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
   const PLACEHOLDER = "Type your name or nickname...";
@@ -10,6 +12,9 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
   const treeRef = useRef(null);
   const inputRef = useRef(null);
   const [tooltip, setTooltip] = useState("");
+  const [showQRCode, setShowQRCode] = useState(false);
+
+  const qrCodeUrl = "https://tree.bairui.dev/?text=" + encodeURIComponent(text);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -25,14 +30,6 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
     const text = value.length ? value : PLACEHOLDER;
     const {width} = measureText(text, {fontSize: "16px", fontFamily: "monospace"});
     input.style.width = `${width + 20}px`;
-  };
-
-  const handleDownload = () => {
-    // const string = JSON.stringify(names);
-    // const blob = new Blob([string], {type: "application/json"});
-    // const url = URL.createObjectURL(blob);
-    // const a = document.createElement("a");
-    // a.href = url;
   };
 
   useEffect(() => {
@@ -99,7 +96,21 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
           />
         </div>
       </div>
-      <div ref={treeRef}></div>
+      <div style={{width: 480, height: 480, display: "flex", alignItems: "center", justifyContent: "center"}}>
+        <div ref={treeRef} style={{display: showQRCode ? "none" : "block"}}></div>
+        <div style={{width: "400px", height: "400px", display: showQRCode ? "block" : "none"}}>
+          <AwesomeQRCode
+            options={{
+              text: qrCodeUrl,
+              size: 960,
+              backgroundImage: QRCODE,
+              backgroundImageSize: "cover",
+              backgroundImagePosition: "center",
+              margin: 0,
+            }}
+          />
+        </div>
+      </div>
       <div
         style={{display: "flex", gap: "10px", marginTop: "20px", visibility: isAdmin && text ? "visible" : "hidden"}}
       >
@@ -115,9 +126,14 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
         <APack
           text="Iv"
           cellSize={20}
-          onClick={handleDownload}
-          onMouseEnter={() => setTooltip("Scan the QR Code to Download")}
-          onMouseLeave={() => setTooltip("")}
+          onMouseEnter={() => {
+            setTooltip("Scan the QR Code to Download");
+            setShowQRCode(true);
+          }}
+          onMouseLeave={() => {
+            setTooltip("");
+            setShowQRCode(false);
+          }}
         />
         <APack
           text="A"

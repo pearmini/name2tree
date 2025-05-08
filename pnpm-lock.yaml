@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@awesomeqr/react':
+        specifier: 0.1.2-rc.0
+        version: 0.1.2-rc.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       apackjs:
         specifier: 0.0.1-beta.2
         version: 0.0.1-beta.2
@@ -63,6 +66,12 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@awesomeqr/react@0.1.2-rc.0':
+    resolution: {integrity: sha512-k3r2f+Oa5BLJON6YQgShHb3E6AdzJCFAPhc07x1Zv+bqWVIimkrQ5UTqJX4lunP4GtWQNu/RLN77pfe4iDwnQA==}
+    peerDependencies:
+      react: ^17.0.1
+      react-dom: ^17.0.1
 
   '@babel/code-frame@7.26.2':
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
@@ -1127,6 +1136,11 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
+
+  '@awesomeqr/react@0.1.2-rc.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   '@babel/code-frame@7.26.2':
     dependencies:
