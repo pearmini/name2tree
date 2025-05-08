@@ -1,0 +1,309 @@
+import * as d3 from "d3";
+import * as apack from "apackjs";
+import {cm} from "./cm.js";
+import {BACKGROUND_COLOR} from "./constants.js";
+
+function reduceDenominator(numerator, denominator) {
+  const rec = (a, b) => (b ? rec(b, a % b) : a);
+  return denominator / rec(numerator, denominator);
+}
+
+function rose(r, n, d, options = {}) {
+  const k = n / d;
+  const m = reduceDenominator(n, d);
+  const points = [];
+  for (let a = 0; a < Math.PI * 2 * m + 0.02; a += 0.02) {
+    const r1 = r * Math.cos(k * a);
+    const x = r1 * Math.cos(a);
+    const y = r1 * Math.sin(a);
+    points.push([x, y]);
+  }
+  return cm.svg("path", {
+    d: d3.line().curve(d3.curveCatmullRom)(points),
+    ...options,
+  });
+}
+
+function toTree(codes) {
+  const data = {
+    children: [],
+  };
+
+  const visited = [data];
+  let currentIndex = 0;
+
+  while (currentIndex < codes.length && visited.length > 0) {
+    const code = +codes[currentIndex];
+    const current = visited.shift();
+    const children = d3.range(code).map((i) => ({children: []}));
+    current.children = children;
+    visited.push(...children);
+    currentIndex++;
+  }
+
+  return data;
+}
+
+function splitBy1And0(code) {
+  const codes = [];
+  let current = null;
+  let i = 0;
+  for (i = 0; i < code.length; i++) {
+    const digit = +code[i];
+    if (!current && digit !== 1) break;
+    else if (!current && digit === 1) current = "" + digit;
+    else if (digit === 0) current += "" + digit;
+    else {
+      codes.push(current);
+      current = digit === 1 ? "" + digit : null;
+      if (!current) break;
+    }
+  }
+  if (current) codes.push(current);
+  return [codes, code.slice(i)];
+}
+
+export function tree(text, {stroke = "black", grid = false} = {}) {
+  const width = 480;
+  const height = 480;
+
+  text = text.trim();
+
+  const ascii = text
+    .split("")
+    .map((code) => code.charCodeAt(0))
+    .join("");
+
+  const randomLcg = d3.randomUniform.source(d3.randomLcg(+ascii))();
+
+  function random(min, max) {
+    return min + (max - min) * randomLcg();
+  }
+
+  function randomInt(min, max) {
+    return Math.floor(random(min, max));
+  }
+
+  const [flowers, tree] = splitBy1And0(ascii);
+
+  const data = toTree(tree);
+  const root = d3.hierarchy(data);
+
+  const range = flowers.length * 10;
+  const middle = tree ? width * 0.25 : width / 2;
+
+  const flowerX = d3
+    .scalePoint()
+    .domain(flowers.map((_, i) => i))
+    .range([middle - range, middle + range]);
+
+  const roses = [];
+  const paths = [];
+  const circles = [];
+  const initLen = 140;
+  const baselineY = height * 0.618 + initLen;
+  const context = cm.mat().translate(width / 2, baselineY);
+  branch(root, initLen, 0, 80);
+
+  function branch(node, len, rotation, angle, roseCount = 0) {
+    context.push();
+    context.rotate(rotation);
+    paths.push({d: `M0,0L0,${-len}`, transform: context.transform()});
+
+    if (node.children) {
+      context.translate(0, -len);
+      len *= 0.618;
+      const children = node.children;
+
+      const leaves = children.map((d) => d.leaves().length);
+      const stacked = [];
+
+      let sum = 0;
+      for (const length of leaves) {
+        sum += length;
+        stacked.push(sum);
+      }
+
+      const scaleAngle = d3.scaleLinear().domain([0, sum]).range([-angle, angle]);
+      const n = children.length;
+
+      let mergeCount = -1;
+      let startIndex = -1;
+      let endIndex = -1;
+      if (n > 2 && node.children.every((d) => !d.children)) mergeCount = randomInt(3, Math.min(n, 10));
+
+      if (mergeCount > 0) {
+        startIndex = randomInt(0, n - mergeCount);
+        endIndex = startIndex + mergeCount - 1;
+      }
+
+      for (let i = 0; i < n; i++) {
+        if (i >= startIndex && i < endIndex) continue;
+        const isMerge = i === endIndex;
+        let prevIndex = isMerge ? startIndex : i - 1;
+        const child = children[i];
+        const childRotation = scaleAngle(stacked[i]);
+        const prevRotation = stacked[prevIndex] ? scaleAngle(stacked[prevIndex]) : -angle;
+        const diff = childRotation - prevRotation;
+        branch(child, len, (childRotation + prevRotation) / 2, Math.min(80, diff), isMerge ? mergeCount : 0);
+      }
+    } else {
+      // [n, d]
+      const roseByCount = {
+        3: [3, 1],
+        4: [4, 2],
+        5: [5, 3],
+        6: [3, 2],
+        7: [7, 3],
+        8: [4, 2],
+        9: [3, 2],
+      };
+
+      if (roseCount > 0) {
+        const [n, d] = roseByCount[roseCount];
+        const r = Math.sqrt(roseCount * len);
+        context.translate(0, -len);
+        roses.push({r, n, d, transform: context.transform()});
+      } else {
+        const r = len / 12;
+        context.translate(0, -len - r);
+        len *= 0.67;
+        circles.push({
+          cx: 0,
+          cy: 0,
+          r,
+          transform: context.transform(),
+        });
+      }
+    }
+
+    context.pop();
+  }
+
+  const circlePath = (r) => {
+    const path = d3.path();
+    path.arc(0, 0, r, 0, Math.PI * 2);
+    return path.toString();
+  };
+
+  let textNode = null;
+
+  try {
+    const wordLength = text.split(" ").length;
+    if (wordLength > 4) {
+      throw new Error("Too many words");
+    }
+
+    let cellSize = 80;
+    let totalLength = wordLength * cellSize + 40;
+    if (totalLength > width / 2) {
+      cellSize = (width / 2 - 40) / wordLength;
+      totalLength = wordLength * cellSize + 20;
+    } else {
+      totalLength -= 20;
+    }
+
+    textNode = cm.svg("g", {
+      transform: `translate(${width - totalLength}, ${height - cellSize - 35})`,
+      children: [apack.text(text, {cellSize})],
+    });
+  } catch (e) {
+    textNode = cm.svg("text", {
+      textContent: text,
+      x: "100%",
+      y: "100%",
+      dy: "-40",
+      dx: "-20",
+      textAnchor: "end",
+      fill: "black",
+      fontSize: 16,
+      fontFamily: "monospace",
+    });
+  }
+
+  const svg = cm.svg("svg", {
+    width,
+    height,
+    styleBackground: BACKGROUND_COLOR,
+    children: [
+      grid &&
+        cm.svg("rect", {
+          x: 5,
+          y: 5,
+          class: "tree-bg",
+          width: width - 10,
+          height: height - 10,
+          stroke,
+          strokeWidth: 1.5,
+          fill: "transparent",
+        }),
+      cm.svg("g", flowers, {
+        transform: (d, i) => `translate(${flowerX(i)}, ${baselineY})`,
+        children: (d, i) => [
+          cm.svg("path", {
+            d: `M0,0L0,${-initLen * 0.618}`,
+            stroke: "black",
+            strokeWidth: 1.5,
+          }),
+          cm.svg("g", {
+            strokeWidth: 1.5,
+            transform: `translate(0, ${-initLen * 0.618})`,
+            children: [
+              rose(12, 1, i + 2, {
+                fill: BACKGROUND_COLOR,
+                stroke: "black",
+              }),
+            ],
+          }),
+        ],
+      }),
+      tree &&
+        cm.svg("g", {
+          stroke: "black",
+          strokeWidth: 1.5,
+          children: [
+            cm.svg("path", paths, {
+              d: (d) => d.d,
+              transform: (d) => d.transform,
+            }),
+          ],
+        }),
+      tree &&
+        cm.svg("g", circles, {
+          transform: (d) => d.transform,
+          children: (d) => [
+            cm.svg("path", {
+              d: circlePath(d.r),
+              fill: "black",
+              stroke: "black",
+            }),
+          ],
+        }),
+      tree &&
+        cm.svg("g", roses, {
+          transform: (d) => d.transform,
+          children: (d) => [
+            rose(d.r, d.n, d.d, {
+              fill: BACKGROUND_COLOR,
+              stroke: "black",
+            }),
+          ],
+        }),
+      textNode,
+      // cm.svg("text", {
+      //   id: "ascii",
+      //   textContent: ascii,
+      //   x: "100%",
+      //   y: "100%",
+      //   dy: "-20",
+      //   dx: "-20",
+      //   textAnchor: "end",
+      //   fill: "black",
+      //   fontSize: 12,
+      //   fontFamily: "monospace",
+      // }),
+    ].filter(Boolean),
+  });
+
+  return svg;
+}
