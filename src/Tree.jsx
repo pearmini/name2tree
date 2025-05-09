@@ -135,13 +135,13 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
             setShowQRCode(false);
           }}
         />
-        <APack
+        {/* <APack
           text="A"
           cellSize={20}
           onClick={onWrite}
           onMouseEnter={() => setTooltip("Write in the Signature Style Above")}
           onMouseLeave={() => setTooltip("")}
-        />
+        /> */}
       </div>
       <p style={{visibility: isAdmin && tooltip ? "visible" : "hidden", marginTop: "10px"}}>{tooltip || "W"}</p>
     </div>
