@@ -77,9 +77,8 @@ function App() {
       <div
         style={{
           position: "fixed",
-          bottom: "20px",
-          right: "15px",
-          padding: "20px",
+          bottom: "12px",
+          right: "12px",
           borderRadius: "10px",
           display: "flex",
           flexDirection: "column",
