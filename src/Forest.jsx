@@ -50,7 +50,6 @@ function TreeModal({name, onClose}) {
           width: "80vmin",
           height: "80vmin",
           overflow: "hidden",
-          borderRadius: "8px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -60,7 +59,7 @@ function TreeModal({name, onClose}) {
   );
 }
 
-export function Forest({isAdmin, names, setNames, selectedIndex}) {
+export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedIndex}) {
   const [selectedId, setSelectedId] = useState(null);
   const selectedName = names.find((name) => name.id === selectedId);
 
@@ -81,6 +80,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex}) {
       setNames(newNames);
       saveToLocalStorage(newNames);
       setSelectedId(null);
+      setSelectedIndex(-1);
     }
   };
 
@@ -176,7 +176,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex}) {
             key={name.id}
             name={name.name}
             onClick={() => onClickTree(name.id)}
-            options={{padding: 0}}
+            options={{padding: 0, number: false}}
             style={{cursor: "pointer"}}
             isSelected={index === selectedIndex}
           />

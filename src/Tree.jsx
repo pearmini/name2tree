@@ -5,6 +5,13 @@ import {BACKGROUND_COLOR} from "./constants.js";
 import {AwesomeQRCode} from "@awesomeqr/react";
 import QRCODE from "./qrcode.png";
 
+function capitalizeFirstLetter(str) {
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function Tree({isAdmin, onAdd, text, setText}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
@@ -12,6 +19,10 @@ export function Tree({isAdmin, onAdd, text, setText}) {
   const inputRef = useRef(null);
   const [tooltip, setTooltip] = useState("");
   const [showQRCode, setShowQRCode] = useState(false);
+  const inputStyle = {
+    fontSize: "24px",
+    fontFamily: "monospace",
+  };
 
   const qrCodeUrl = "https://tree.bairui.dev/?text=" + encodeURIComponent(text);
 
@@ -26,9 +37,10 @@ export function Tree({isAdmin, onAdd, text, setText}) {
   };
 
   const updateInputWidth = (input, value) => {
+    const MAX_WIDTH = Math.min(500, window.innerWidth * 0.8);
     const text = value.length ? value : PLACEHOLDER;
-    const {width} = measureText(text, {fontSize: "16px", fontFamily: "monospace"});
-    input.style.width = `${width + 20}px`;
+    const {width} = measureText(text, inputStyle);
+    input.style.width = `${Math.min(width + 20, MAX_WIDTH)}px`;
   };
 
   useEffect(() => {
@@ -42,7 +54,8 @@ export function Tree({isAdmin, onAdd, text, setText}) {
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
-      treeRef.current.appendChild(tree(text || DEFAULT_TEXT, {grid: false}).render());
+      const treeText = capitalizeFirstLetter(text || DEFAULT_TEXT);
+      treeRef.current.appendChild(tree(treeText, {grid: false}).render());
     }
   }, [text]);
 
@@ -70,7 +83,6 @@ export function Tree({isAdmin, onAdd, text, setText}) {
     >
       <div
         style={{
-          marginBottom: "20px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -84,12 +96,11 @@ export function Tree({isAdmin, onAdd, text, setText}) {
             value={text}
             onChange={handleInputChange}
             style={{
-              fontFamily: "monospace",
               backgroundColor: BACKGROUND_COLOR,
               border: "none",
               padding: "5px",
               width: "auto",
-              fontSize: "16px",
+              ...inputStyle,
             }}
           />
         </div>
@@ -110,7 +121,7 @@ export function Tree({isAdmin, onAdd, text, setText}) {
         </div>
       </div>
       <div
-        style={{display: "flex", gap: "10px", marginTop: "40px", visibility: isAdmin && text ? "visible" : "hidden"}}
+        style={{display: "flex", gap: "10px", marginTop: "20px", visibility: isAdmin && text ? "visible" : "hidden"}}
       >
         {isAdmin && (
           <button
@@ -118,6 +129,9 @@ export function Tree({isAdmin, onAdd, text, setText}) {
             onMouseEnter={() => setTooltip("Let's create a forest together with your signature!")}
             onMouseLeave={() => setTooltip("")}
             className="button primary-button"
+            style={{
+              fontSize: "18px",
+            }}
           >
             Add to Forest
           </button>
@@ -132,6 +146,9 @@ export function Tree({isAdmin, onAdd, text, setText}) {
             setShowQRCode(false);
           }}
           className="button"
+          style={{
+            fontSize: "18px",
+          }}
         >
           Download
         </button>
@@ -139,8 +156,8 @@ export function Tree({isAdmin, onAdd, text, setText}) {
       <p
         style={{
           visibility: isAdmin && tooltip ? "visible" : "hidden",
-          marginTop: "20px",
-          fontSize: "14px",
+          marginTop: "24px",
+          fontSize: "18px",
         }}
       >
         {tooltip || "W"}

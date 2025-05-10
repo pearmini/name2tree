@@ -85,13 +85,15 @@ function App() {
       <div
         style={{
           position: "fixed",
-          bottom: "12px",
-          right: "12px",
+          // bottom: "12px",
+          right: "16px",
           borderRadius: "10px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: "10px",
+          bottom: "50%",
+          transform: "translateY(50%)",
         }}
       >
         {/* <APack text="Tree" cellSize={40} onClick={onHome} />
@@ -100,12 +102,12 @@ function App() {
         <APack text="About" cellSize={40} onClick={onAbout} /> */}
         {page === "tree" ? (
           <>
-            <APack text="Forest" cellSize={40} onClick={onForest} />
-            <APack text="Write" cellSize={40} onClick={onWriting} />
-            <APack text="About" cellSize={40} onClick={onAbout} />
+            <APack text="Forest" cellSize={50} onClick={onForest} />
+            <APack text="Write" cellSize={50} onClick={onWriting} />
+            <APack text="About" cellSize={50} onClick={onAbout} />
           </>
         ) : (
-          <APack text="Home" cellSize={40} onClick={onHome} />
+          <APack text="Home" cellSize={50} onClick={onHome} />
         )}
       </div>
     </div>
