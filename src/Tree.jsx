@@ -6,10 +6,11 @@ import {AwesomeQRCode} from "@awesomeqr/react";
 import QRCODE from "./qrcode.png";
 
 function capitalizeFirstLetter(str) {
-  return str
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+  // return str
+  //   .split(" ")
+  //   .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+  //   .join(" ");
+  return str;
 }
 
 export function Tree({isAdmin, onAdd, text, setText}) {
