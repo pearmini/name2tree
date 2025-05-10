@@ -86,7 +86,7 @@ function App() {
         style={{
           position: "fixed",
           // bottom: "12px",
-          right: "16px",
+          right: "20px",
           borderRadius: "10px",
           display: "flex",
           flexDirection: "column",
