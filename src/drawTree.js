@@ -24,6 +24,12 @@ function rose(r, n, d, options = {}) {
   });
 }
 
+function ellipsis(text, maxLength) {
+  const chars = Array.from(text);
+  if (chars.length <= maxLength) return text;
+  return chars.slice(0, maxLength).join("") + "...";
+}
+
 function toTree(codes) {
   const data = {
     children: [],
@@ -210,7 +216,7 @@ export function tree(text, {stroke = "black", grid = false, padding = 20, number
     });
   } catch (e) {
     textNode = cm.svg("text", {
-      textContent: text,
+      textContent: ellipsis(text, 18),
       x: "100%",
       y: "100%",
       dy: "-55",
@@ -299,14 +305,14 @@ export function tree(text, {stroke = "black", grid = false, padding = 20, number
       number &&
         cm.svg("text", {
           id: "ascii",
-          textContent: ascii,
+          textContent: ellipsis(ascii, 58),
           x: "100%",
           y: "100%",
           dy: "-26",
           dx: "-20",
           textAnchor: "end",
           fill: "black",
-          fontSize: 10,
+          fontSize: 12,
           fontFamily: "monospace",
         }),
     ].filter(Boolean),
