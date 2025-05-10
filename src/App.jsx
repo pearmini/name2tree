@@ -32,8 +32,6 @@ function App() {
   const [names, setNames] = useState(initData());
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  console.log(names);
-
   function onHome() {
     setPage("tree");
     setSelectedIndex(-1);
