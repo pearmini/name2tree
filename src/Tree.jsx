@@ -1,12 +1,11 @@
 import {useState, useEffect, useRef} from "react";
-import {APack} from "./APack.jsx";
 import {tree} from "./drawTree.js";
 import {measureText} from "./text.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 import {AwesomeQRCode} from "@awesomeqr/react";
 import QRCODE from "./qrcode.png";
 
-export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
+export function Tree({isAdmin, onAdd, text, setText}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
   const treeRef = useRef(null);
@@ -34,7 +33,6 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
 
   useEffect(() => {
     const onclick = (e) => {
-      if (e.target.className.includes("apack-button")) return;
       if (inputRef.current) inputRef.current.focus();
     };
     window.addEventListener("click", onclick);
@@ -117,7 +115,7 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
         {isAdmin && (
           <button
             onClick={handleAdd}
-            onMouseEnter={() => setTooltip("Add to the Public Forest Archive")}
+            onMouseEnter={() => setTooltip("Let's create a forest together with your signature!")}
             onMouseLeave={() => setTooltip("")}
             className="button primary-button"
           >
@@ -126,7 +124,7 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
         )}
         <button
           onMouseEnter={() => {
-            setTooltip("Scan the QR Code to Download");
+            setTooltip("Scan the QR code to download or share your tree!");
             setShowQRCode(true);
           }}
           onMouseLeave={() => {
@@ -138,7 +136,15 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
           Download
         </button>
       </div>
-      <p style={{visibility: isAdmin && tooltip ? "visible" : "hidden", marginTop: "10px"}}>{tooltip || "W"}</p>
+      <p
+        style={{
+          visibility: isAdmin && tooltip ? "visible" : "hidden",
+          marginTop: "20px",
+          fontSize: "14px",
+        }}
+      >
+        {tooltip || "W"}
+      </p>
     </div>
   );
 }
