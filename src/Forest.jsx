@@ -1,18 +1,87 @@
-import {useEffect, useRef} from "react";
-import {forest} from "./drawForest.js";
+import {useEffect, useRef, useState} from "react";
+import {tree} from "./drawTree.js";
+import {saveToLocalStorage} from "./file.js";
 
-export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedIndex}) {
-  const forestRef = useRef(null);
-  const forestContainerRef = useRef(null);
+function Tree({name, onClick, options = {}, style = {}, isSelected = false}) {
+  const treeRef = useRef(null);
+
+  useEffect(() => {
+    if (treeRef.current) {
+      treeRef.current.innerHTML = "";
+      const svg = tree(name, options).render();
+      svg.style.width = "100%";
+      svg.style.height = "100%";
+      svg.setAttribute("viewBox", "0 0 480 480");
+      treeRef.current.appendChild(svg);
+    }
+  }, [name]);
+
+  return (
+    <div
+      ref={treeRef}
+      style={{
+        ...style,
+        animation: isSelected ? "fadeIn 1.5s ease-in-out" : "none",
+      }}
+      onClick={onClick}
+    />
+  );
+}
+
+function TreeModal({name, onClose}) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: "80vmin",
+          height: "80vmin",
+          overflow: "hidden",
+          borderRadius: "8px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Tree name={name} />
+      </div>
+    </div>
+  );
+}
+
+export function Forest({isAdmin, names, setNames, selectedIndex}) {
+  const [selectedId, setSelectedId] = useState(null);
+  const selectedName = names.find((name) => name.id === selectedId);
+
+  function onClickTree(id) {
+    setSelectedId(id);
+  }
 
   const onSaveToLocalStorage = (names) => {
-    localStorage.setItem("names", JSON.stringify(names));
+    saveToLocalStorage(names);
     alert("Saved to local storage.");
   };
 
   const onRemoveName = () => {
-    setNames(names.slice(1));
-    alert("Removed the first name.");
+    if (confirm("Are you sure you want to remove this tree?")) {
+      const index = selectedId !== null ? names.findIndex((name) => name.id === selectedId) : 0;
+      const newNames = [...names];
+      newNames.splice(index, 1);
+      setNames(newNames);
+      saveToLocalStorage(newNames);
+      setSelectedId(null);
+    }
   };
 
   const onDownloadToFile = (names) => {
@@ -27,6 +96,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
 
   const onClearLocalStorage = () => {
     setNames([]);
+    saveToLocalStorage([]);
     alert("Cleared local storage.");
   };
 
@@ -46,7 +116,6 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   };
 
   useEffect(() => {
-    console.log(isAdmin);
     // cmd + s: save to local storage
     // cmd + d: download to file
     // cmd + c: clear local storage
@@ -73,36 +142,47 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
     };
     window.addEventListener("keydown", keydown);
     return () => window.removeEventListener("keydown", keydown);
-  }, [names]);
-
-  useEffect(() => {
-    if (forestRef.current) {
-      forestRef.current.innerHTML = "";
-      forestRef.current.appendChild(forest(names, {selectedIndex}).render());
-      setSelectedIndex(-1);
-    }
-  }, [names]);
-
-  useEffect(() => {
-    const onclick = () => setSelectedIndex(-1);
-    window.addEventListener("click", onclick);
-    return () => window.removeEventListener("click", onclick);
-  }, []);
+  }, [names, selectedId]);
 
   return (
-    <div
-      className="section"
-      ref={forestContainerRef}
-      style={{
-        height: "100vh",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <div ref={forestRef}></div>
-    </div>
+    <>
+      <style>
+        {`
+          @keyframes fadeIn {
+            0% {
+              opacity: 0.5;
+              transform: scale(0.1);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+        `}
+      </style>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+          gap: "0px",
+          padding: "0px 80px 80px 80px",
+          width: "100vw",
+          height: "100vh",
+          overflow: "auto",
+        }}
+      >
+        {names.map((name, index) => (
+          <Tree
+            key={name.id}
+            name={name.name}
+            onClick={() => onClickTree(name.id)}
+            options={{padding: 0}}
+            style={{cursor: "pointer"}}
+            isSelected={index === selectedIndex}
+          />
+        ))}
+      </div>
+      {selectedName && <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} />}
+    </>
   );
 }

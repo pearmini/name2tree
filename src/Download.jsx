@@ -3,13 +3,6 @@ import {tree} from "./drawTree.js";
 
 export function Download({text}) {
   const treeRef = useRef(null);
-  const buttonStyle = {
-    backgroundColor: "transparent",
-    color: "black",
-    padding: "10px",
-    borderRadius: "5px",
-    border: "1.5px solid black",
-  };
 
   useEffect(() => {
     if (treeRef.current) {
@@ -22,53 +15,53 @@ export function Download({text}) {
     }
   }, [text]);
 
-  const handleDownloadSVG = () => {
-    const svg = treeRef.current.querySelector("svg");
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const blob = new Blob([svgData], {type: "image/svg+xml"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${text}.svg`;
-    a.click();
-  };
+  // const handleDownloadSVG = () => {
+  //   const svg = treeRef.current.querySelector("svg");
+  //   const svgData = new XMLSerializer().serializeToString(svg);
+  //   const blob = new Blob([svgData], {type: "image/svg+xml"});
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `${text}.svg`;
+  //   a.click();
+  // };
 
   const handleDownloadPNG = () => {
     const svg = treeRef.current.querySelector("svg");
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    
+
     img.onerror = (e) => {
       console.error("Error loading image:", e);
     };
-    
+
     // Convert SVG to data URL
     const svgData = new XMLSerializer().serializeToString(svg);
     const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       img.src = e.target.result;
     };
-    
+
     reader.readAsDataURL(svgBlob);
-    
+
     img.onload = () => {
       console.log("Image loaded successfully");
       // Get device pixel ratio
       const dpr = window.devicePixelRatio || 1;
-      
+
       // Set canvas dimensions accounting for pixel ratio
       canvas.width = img.width * dpr;
       canvas.height = img.height * dpr;
-      
+
       // Scale context to account for pixel ratio
       ctx.scale(dpr, dpr);
-      
+
       // Draw image at original size
       ctx.drawImage(img, 0, 0, img.width, img.height);
-      
+
       const url = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = url;
@@ -81,9 +74,11 @@ export function Download({text}) {
     <div
       style={{
         width: "100vw",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <div ref={treeRef} style={{maxWidth: "calc(100vw - 30px)", maxHeight: "calc(100vh - 30px)"}}></div>
@@ -95,12 +90,12 @@ export function Download({text}) {
           justifyContent: "center",
         }}
       >
-        <button style={buttonStyle} onClick={handleDownloadPNG}>
-          Download PNG
+        <button className="button" onClick={handleDownloadPNG}>
+          Download
         </button>
-        <button style={buttonStyle} onClick={handleDownloadSVG}>
+        {/* <button className="button" onClick={handleDownloadSVG}>
           Download SVG
-        </button>
+        </button> */}
       </div>
     </div>
   );
