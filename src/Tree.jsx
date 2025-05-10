@@ -112,20 +112,19 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
         </div>
       </div>
       <div
-        style={{display: "flex", gap: "10px", marginTop: "20px", visibility: isAdmin && text ? "visible" : "hidden"}}
+        style={{display: "flex", gap: "10px", marginTop: "40px", visibility: isAdmin && text ? "visible" : "hidden"}}
       >
         {isAdmin && (
-          <APack
-            text="+"
-            cellSize={20}
+          <button
             onClick={handleAdd}
             onMouseEnter={() => setTooltip("Add to the Public Forest Archive")}
             onMouseLeave={() => setTooltip("")}
-          />
+            className="button primary-button"
+          >
+            Add to Forest
+          </button>
         )}
-        <APack
-          text="Iv"
-          cellSize={20}
+        <button
           onMouseEnter={() => {
             setTooltip("Scan the QR Code to Download");
             setShowQRCode(true);
@@ -134,14 +133,10 @@ export function Tree({isAdmin, onAdd, onWrite, text, setText}) {
             setTooltip("");
             setShowQRCode(false);
           }}
-        />
-        {/* <APack
-          text="A"
-          cellSize={20}
-          onClick={onWrite}
-          onMouseEnter={() => setTooltip("Write in the Signature Style Above")}
-          onMouseLeave={() => setTooltip("")}
-        /> */}
+          className="button"
+        >
+          Download
+        </button>
       </div>
       <p style={{visibility: isAdmin && tooltip ? "visible" : "hidden", marginTop: "10px"}}>{tooltip || "W"}</p>
     </div>
