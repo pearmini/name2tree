@@ -63,7 +63,7 @@ function splitBy1And0(code) {
   return [codes, code.slice(i)];
 }
 
-export function tree(text, {stroke = "black", grid = false, padding = 20} = {}) {
+export function tree(text, {stroke = "black", grid = false, padding = 20, number = true} = {}) {
   const width = 480;
   const height = 480;
 
@@ -205,7 +205,7 @@ export function tree(text, {stroke = "black", grid = false, padding = 20} = {}) 
     }
 
     textNode = cm.svg("g", {
-      transform: `translate(${width - totalLength}, ${baselineY - cellSize- 5})`,
+      transform: `translate(${width - totalLength}, ${baselineY - cellSize - 5})`,
       children: [apack.text(text, {cellSize, word: {strokeWidth: 1.5}})],
     });
   } catch (e) {
@@ -296,18 +296,19 @@ export function tree(text, {stroke = "black", grid = false, padding = 20} = {}) 
         stroke: "black",
         strokeWidth: 1.5,
       }),
-      // cm.svg("text", {
-      //   id: "ascii",
-      //   textContent: ascii,
-      //   x: "100%",
-      //   y: "100%",
-      //   dy: "-20",
-      //   dx: "-20",
-      //   textAnchor: "end",
-      //   fill: "black",
-      //   fontSize: 12,
-      //   fontFamily: "monospace",
-      // }),
+      number &&
+        cm.svg("text", {
+          id: "ascii",
+          textContent: ascii,
+          x: "100%",
+          y: "100%",
+          dy: "-26",
+          dx: "-20",
+          textAnchor: "end",
+          fill: "black",
+          fontSize: 10,
+          fontFamily: "monospace",
+        }),
     ].filter(Boolean),
   });
 
