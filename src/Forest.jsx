@@ -165,7 +165,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
           gap: "0px",
-          padding: "0px 80px 80px 80px",
+          padding: "0px 100px 100px 100px",
           width: "100vw",
           height: "100vh",
           overflow: "auto",

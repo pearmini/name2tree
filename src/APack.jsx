@@ -2,7 +2,7 @@ import * as apack from "apackjs";
 import {useEffect, useRef} from "react";
 import {BACKGROUND_COLOR} from "./constants.js";
 
-export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave}) {
+export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave, style={}}) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -19,9 +19,9 @@ export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave}) {
       className={"apack-button"}
       style={{
         padding: "2px",
-        // borderRadius: "5px",
         cursor: "pointer",
         border: "1.5px solid black",
+        ...style,
       }}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
