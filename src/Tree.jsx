@@ -104,6 +104,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
             style={{
               backgroundColor: BACKGROUND_COLOR,
               border: "none",
+              borderBottom: "1.5px solid #ddd",
               padding: "5px",
               width: "auto",
               ...inputStyle,
@@ -170,7 +171,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
                 fontSize: "18px",
               }}
             >
-              Download
+              Download or Print
             </button>
           </>
         ) : (
