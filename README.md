@@ -1,12 +1,19 @@
-# React + Vite
+# Name2Tree: Find the Tree in You Name
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+"Find Your Name in the Tree" is an [online platform](https://tree.bairui.dev/) where you can transform your name into a tree and add it to a public archive with a stamp-style signature.
 
-Currently, two official plugins are available:
+<img src="./img/Bairui SU.png" width=480 />
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Why？
 
-## Expanding the ESLint configuration
+This project explores digital identity by visualizing names as natural forms. It also experiments with writing English words within Chinese grid systems to create authorship art pieces.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## How？
+
+- Convert the input name into ASCII or Unicode digits, which are numerical representations used by computers to encode characters.
+- Use the resulting sequence of digits to generate a tree structure. Each digit becomes a node, and its value determines the number of child nodes it will have.
+- Merge certain branches into [mathematical rose patterns](<https://en.wikipedia.org/wiki/Rose_(mathematics)>) for aesthetic appeal and to reduce visual clutter or overlap.
+- Refine edge cases to ensure the tree appears natural and well-balanced — for example, condensing long sequences like multiple “10”s into a single rose shape to improve symmetry.
+- Finally, transform the name into a signature using [APack](https://apack.bairui.dev/), like stamping the artwork with your identity to indicate its creator.
+
+![About](./img/about.png)
