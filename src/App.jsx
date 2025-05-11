@@ -62,6 +62,10 @@ function App() {
     setPage("write");
   }
 
+  function onGithub() {
+    window.open("https://github.com/pearmini/string2tree", "_blank");
+  }
+
   return (
     <div
       style={{
@@ -69,7 +73,9 @@ function App() {
         fontFamily: "monospace",
       }}
     >
-      {page === "tree" && <Tree isAdmin={isAdmin} onAdd={onAdd} text={text} setText={setText} onWrite={onWrite} />}
+      {page === "tree" && (
+        <Tree isAdmin={isAdmin} onAdd={onAdd} text={text} setText={setText} onWrite={onWrite} onForest={onForest} />
+      )}
       {page === "forest" && (
         <Forest
           isAdmin={isAdmin}
@@ -85,7 +91,6 @@ function App() {
       <div
         style={{
           position: "fixed",
-          // bottom: "12px",
           right: "20px",
           borderRadius: "10px",
           display: "flex",
@@ -105,6 +110,7 @@ function App() {
             <APack text="Forest" cellSize={50} onClick={onForest} />
             <APack text="Write" cellSize={50} onClick={onWriting} />
             <APack text="About" cellSize={50} onClick={onAbout} />
+            {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
           </>
         ) : (
           <APack text="Back" cellSize={50} onClick={onHome} />
