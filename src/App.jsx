@@ -107,7 +107,7 @@ function App() {
             <APack text="About" cellSize={50} onClick={onAbout} />
           </>
         ) : (
-          <APack text="Home" cellSize={50} onClick={onHome} />
+          <APack text="Back" cellSize={50} onClick={onHome} />
         )}
       </div>
     </div>
