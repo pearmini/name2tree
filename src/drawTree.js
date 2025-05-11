@@ -71,7 +71,7 @@ function splitBy1And0(code) {
 
 export function tree(
   text,
-  {stroke = "black", grid = false, padding = 20, number = true, stamp = true, count = false} = {},
+  {stroke = "black", grid = false, padding = 20, number = true, stamp = true, count = false, line = true} = {},
 ) {
   const width = 480;
   const height = 480;
@@ -327,11 +327,12 @@ export function tree(
             }),
           ],
         }),
-      cm.svg("path", {
-        d: `M${padding},${baselineY}L${width - padding},${baselineY}`,
-        stroke: "black",
-        strokeWidth: 1.5,
-      }),
+      line &&
+        cm.svg("path", {
+          d: `M${padding},${baselineY}L${width - padding},${baselineY}`,
+          stroke: "black",
+          strokeWidth: 1.5,
+        }),
       number &&
         cm.svg("text", {
           id: "ascii",

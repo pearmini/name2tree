@@ -7,6 +7,7 @@ import {About} from "./About.jsx";
 import {BACKGROUND_COLOR} from "./constants.js";
 import {Download} from "./Download.jsx";
 import {saveToLocalStorage} from "./file.js";
+import {Wall} from "./Wall.jsx";
 import data from "./names.json";
 import "./App.css";
 
