@@ -1,20 +1,21 @@
-import {useRef, useEffect} from "react";
+import {useRef, useEffect, useState} from "react";
 import {tree} from "./drawTree.js";
 import {downloadPNG} from "./file.js";
 
 export function Download({text}) {
   const treeRef = useRef(null);
+  const [showNumbers, setShowNumbers] = useState(true);
 
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
-      const svg = tree(text, {grid: false}).render();
+      const svg = tree(text, {grid: false, number: showNumbers}).render();
       svg.style.width = "100%";
       svg.style.height = "100%";
       svg.setAttribute("viewBox", "0 0 480 480");
       treeRef.current.appendChild(svg);
     }
-  }, [text]);
+  }, [text, showNumbers]);
 
   const handleDownloadPNG = () => {
     const svg = treeRef.current.querySelector("svg");
@@ -45,6 +46,15 @@ export function Download({text}) {
             justifyContent: "center",
           }}
         >
+          <label style={{display: "flex", alignItems: "center", gap: "5px"}}>
+            <input
+              type="checkbox"
+              checked={showNumbers}
+              onChange={(e) => setShowNumbers(e.target.checked)}
+              style={{width: "16px", height: "16px"}}
+            />
+            Show Numbers
+          </label>
           <button className="button" onClick={handleDownloadPNG}>
             Download
           </button>
