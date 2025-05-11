@@ -69,7 +69,10 @@ function splitBy1And0(code) {
   return [codes, code.slice(i)];
 }
 
-export function tree(text, {stroke = "black", grid = false, padding = 20, number = true} = {}) {
+export function tree(
+  text,
+  {stroke = "black", grid = false, padding = 20, number = true, stamp = true, count = false} = {},
+) {
   const width = 480;
   const height = 480;
 
@@ -106,6 +109,7 @@ export function tree(text, {stroke = "black", grid = false, padding = 20, number
   const roses = [];
   const paths = [];
   const circles = [];
+  const numbers = [];
   const initLen = 140;
   const baselineY = height * 0.618 + initLen;
   const context = cm.mat().translate(width / 2, baselineY);
@@ -130,13 +134,20 @@ export function tree(text, {stroke = "black", grid = false, padding = 20, number
         stacked.push(sum);
       }
 
+      if (count) {
+        numbers.push({
+          count: node.children.length,
+          transform: context.transform(),
+        });
+      }
+
       const scaleAngle = d3.scaleLinear().domain([0, sum]).range([-angle, angle]);
       const n = children.length;
 
       let mergeCount = -1;
       let startIndex = -1;
       let endIndex = -1;
-      if (n > 2 && node.children.every((d) => !d.children)) mergeCount = randomInt(3, Math.min(n, 10));
+      if (n > 2 && node.children.every((d) => !d.children) && !count) mergeCount = randomInt(3, Math.min(n, 10));
 
       if (mergeCount > 0) {
         startIndex = randomInt(0, n - mergeCount);
@@ -296,7 +307,26 @@ export function tree(text, {stroke = "black", grid = false, padding = 20, number
             }),
           ],
         }),
-      textNode,
+      stamp && textNode,
+      count &&
+        cm.svg("g", numbers, {
+          transform: (d) => d.transform,
+          children: (d) => [
+            cm.svg("circle", {
+              cx: 0,
+              cy: 0,
+              r: 14,
+              fill: "black",
+            }),
+            cm.svg("text", {
+              textContent: d.count,
+              fill: "white",
+              fontSize: 20,
+              textAnchor: "middle",
+              dy: "0.4em",
+            }),
+          ],
+        }),
       cm.svg("path", {
         d: `M${padding},${baselineY}L${width - padding},${baselineY}`,
         stroke: "black",

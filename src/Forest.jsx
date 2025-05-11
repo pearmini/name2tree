@@ -1,32 +1,6 @@
-import {useEffect, useRef, useState} from "react";
-import {tree} from "./drawTree.js";
+import {useEffect, useState} from "react";
 import {saveToLocalStorage} from "./file.js";
-
-function Tree({name, onClick, options = {}, style = {}, isSelected = false}) {
-  const treeRef = useRef(null);
-
-  useEffect(() => {
-    if (treeRef.current) {
-      treeRef.current.innerHTML = "";
-      const svg = tree(name, options).render();
-      svg.style.width = "100%";
-      svg.style.height = "100%";
-      svg.setAttribute("viewBox", "0 0 480 480");
-      treeRef.current.appendChild(svg);
-    }
-  }, [name]);
-
-  return (
-    <div
-      ref={treeRef}
-      style={{
-        ...style,
-        animation: isSelected ? "fadeIn 1.5s ease-in-out" : "none",
-      }}
-      onClick={onClick}
-    />
-  );
-}
+import {TreeItem} from "./TreeItem.jsx";
 
 function TreeModal({name, onClose}) {
   return (
@@ -53,7 +27,7 @@ function TreeModal({name, onClose}) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <Tree name={name} />
+        <TreeItem name={name} />
       </div>
     </div>
   );
@@ -172,7 +146,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
         }}
       >
         {names.map((name, index) => (
-          <Tree
+          <TreeItem
             key={name.id}
             name={name.name}
             onClick={() => onClickTree(name.id)}
