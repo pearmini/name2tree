@@ -1,8 +1,14 @@
 import {useEffect, useState} from "react";
 import {saveToLocalStorage} from "./file.js";
 import {TreeItem} from "./TreeItem.jsx";
+import QRCODE from "./qrcode.png";
+import {AwesomeQRCode} from "@awesomeqr/react";
+import {BACKGROUND_COLOR} from "./constants.js";
 
 function TreeModal({name, onClose}) {
+  const [showQRCode, setShowQRCode] = useState(false);
+  const qrCodeUrl = "https://tree.bairui.dev/?text=" + encodeURIComponent(name);
+
   return (
     <div
       style={{
@@ -24,10 +30,38 @@ function TreeModal({name, onClose}) {
           width: "80vmin",
           height: "80vmin",
           overflow: "hidden",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: BACKGROUND_COLOR,
+          position: "relative",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <TreeItem name={name} />
+        {showQRCode ? (
+          <div style={{width: "60vmin", height: "60vmin"}}>
+            <AwesomeQRCode
+              options={{
+                text: qrCodeUrl,
+                size: 960,
+                backgroundImage: QRCODE,
+                backgroundImageSize: "cover",
+                backgroundImagePosition: "center",
+                margin: 0,
+              }}
+            />
+          </div>
+        ) : (
+          <TreeItem name={name} />
+        )}
+        <button
+          onMouseEnter={() => setShowQRCode(true)}
+          onMouseLeave={() => setShowQRCode(false)}
+          className="button primary-button"
+          style={{position: "absolute", top: 0, right: 0}}
+        >
+          Download
+        </button>
       </div>
     </div>
   );
