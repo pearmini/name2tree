@@ -22,6 +22,7 @@ function uid() {
 function App() {
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
   const qrCodeText = new URLSearchParams(window.location.search).get("text");
+  const isMobile = window.innerWidth < 768;
 
   if (qrCodeText) {
     return <Download text={qrCodeText} />;
@@ -74,7 +75,15 @@ function App() {
       }}
     >
       {page === "tree" && (
-        <Tree isAdmin={isAdmin} onAdd={onAdd} text={text} setText={setText} onWrite={onWrite} onForest={onForest} />
+        <Tree
+          isAdmin={isAdmin}
+          onAdd={onAdd}
+          text={text}
+          setText={setText}
+          onWrite={onWrite}
+          onForest={onForest}
+          isMobile={isMobile}
+        />
       )}
       {page === "forest" && (
         <Forest
@@ -88,34 +97,36 @@ function App() {
       )}
       {page === "write" && <Writing isAdmin={isAdmin} />}
       {page === "about" && <About isAdmin={isAdmin} />}
-      <div
-        style={{
-          position: "fixed",
-          right: "20px",
-          borderRadius: "10px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "10px",
-          bottom: "50%",
-          transform: "translateY(50%)",
-        }}
-      >
-        {/* <APack text="Tree" cellSize={40} onClick={onHome} />
+      {!isMobile && (
+        <div
+          style={{
+            position: "fixed",
+            right: "20px",
+            borderRadius: "10px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+            bottom: "50%",
+            transform: "translateY(50%)",
+          }}
+        >
+          {/* <APack text="Tree" cellSize={40} onClick={onHome} />
         <APack text="Forest" cellSize={40} onClick={onForest} />
         <APack text="Write" cellSize={40} onClick={onWriting} />
         <APack text="About" cellSize={40} onClick={onAbout} /> */}
-        {page === "tree" ? (
-          <>
-            <APack text="Forest" cellSize={50} onClick={onForest} />
-            <APack text="Write" cellSize={50} onClick={onWriting} />
-            <APack text="About" cellSize={50} onClick={onAbout} />
-            {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
-          </>
-        ) : (
-          <APack text="Back" cellSize={50} onClick={onHome} />
-        )}
-      </div>
+          {page === "tree" ? (
+            <>
+              <APack text="Forest" cellSize={50} onClick={onForest} />
+              <APack text="Write" cellSize={50} onClick={onWriting} />
+              <APack text="About" cellSize={50} onClick={onAbout} />
+              {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
+            </>
+          ) : (
+            <APack text="Back" cellSize={50} onClick={onHome} />
+          )}
+        </div>
+      )}
     </div>
   );
 }
