@@ -4,6 +4,7 @@ import {measureText} from "./text.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 import {AwesomeQRCode} from "@awesomeqr/react";
 import QRCODE from "./qrcode.png";
+import {downloadPNG, downloadSVG} from "./file.js";
 
 function capitalizeFirstLetter(str) {
   // return str
@@ -13,7 +14,7 @@ function capitalizeFirstLetter(str) {
   return str;
 }
 
-export function Tree({isAdmin, onAdd, text, setText}) {
+export function Tree({isAdmin, onAdd, text, setText, onForest}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
   const treeRef = useRef(null);
@@ -21,7 +22,7 @@ export function Tree({isAdmin, onAdd, text, setText}) {
   const [tooltip, setTooltip] = useState("");
   const [showQRCode, setShowQRCode] = useState(false);
   const inputStyle = {
-    fontSize: "24px",
+    fontSize: isAdmin ? "24px" : "16px",
     fontFamily: "monospace",
   };
 
@@ -121,44 +122,64 @@ export function Tree({isAdmin, onAdd, text, setText}) {
           />
         </div>
       </div>
-      <div
-        style={{display: "flex", gap: "10px", marginTop: "20px", visibility: isAdmin && text ? "visible" : "hidden"}}
-      >
-        {isAdmin && (
-          <button
-            onClick={handleAdd}
-            onMouseEnter={() => setTooltip("Let's create a forest together with your signature!")}
-            onMouseLeave={() => setTooltip("")}
-            className="button primary-button"
-            style={{
-              fontSize: "18px",
-            }}
-          >
-            Add to Forest
-          </button>
+      <div style={{display: "flex", gap: "10px", marginTop: "20px", visibility: text ? "visible" : "hidden"}}>
+        {isAdmin ? (
+          <>
+            <button
+              onClick={handleAdd}
+              onMouseEnter={() => setTooltip("Let's create a forest together with your signature!")}
+              onMouseLeave={() => setTooltip("")}
+              className="button primary-button"
+              style={{
+                fontSize: "18px",
+              }}
+            >
+              Add to Forest
+            </button>
+            <button
+              onMouseEnter={() => {
+                setTooltip("Scan the QR code to download or share your tree!");
+                setShowQRCode(true);
+              }}
+              onMouseLeave={() => {
+                setTooltip("");
+                setShowQRCode(false);
+              }}
+              className="button"
+              style={{
+                fontSize: "18px",
+              }}
+            >
+              Download
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="button" style={{fontSize: "14px"}} onClick={() => onForest()}>
+              Explore Forest
+            </button>
+            <button
+              className="button"
+              style={{fontSize: "14px"}}
+              onClick={() => downloadPNG(text, treeRef.current.querySelector("svg"))}
+            >
+              ↓ PNG
+            </button>
+            <button
+              className="button"
+              style={{fontSize: "14px"}}
+              onClick={() => downloadSVG(text, treeRef.current.querySelector("svg"))}
+            >
+              ↓ SVG
+            </button>
+          </>
         )}
-        <button
-          onMouseEnter={() => {
-            setTooltip("Scan the QR code to download or share your tree!");
-            setShowQRCode(true);
-          }}
-          onMouseLeave={() => {
-            setTooltip("");
-            setShowQRCode(false);
-          }}
-          className="button"
-          style={{
-            fontSize: "18px",
-          }}
-        >
-          Download
-        </button>
       </div>
       <p
         style={{
-          visibility: isAdmin && tooltip ? "visible" : "hidden",
+          visibility: tooltip ? "visible" : "hidden",
           marginTop: "24px",
-          fontSize: "18px",
+          fontSize: isAdmin ? "18px" : "14px",
         }}
       >
         {tooltip || "W"}
