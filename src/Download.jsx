@@ -73,7 +73,7 @@ export function Download({text}) {
         </li>
         <li style={{paddingBottom: "10px"}}>
           <span>
-            Charming.js: <a href="https://charmingjs.org">charmingjs.org</a>
+            Instagram: <a href="https://www.instagram.com/subairui24">@subairui24</a>
           </span>
         </li>
         <li style={{paddingBottom: "10px"}}>
@@ -83,7 +83,7 @@ export function Download({text}) {
         </li>
         <li style={{paddingBottom: "10px"}}>
           <span>
-            Instagram: <a href="https://www.instagram.com/subairui24">@subairui24</a>
+            Charming.js: <a href="https://charmingjs.org">charmingjs.org</a>
           </span>
         </li>
       </ul>
