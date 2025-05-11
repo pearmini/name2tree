@@ -123,7 +123,12 @@ function App() {
               {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
             </>
           ) : (
-            <APack text="Back" cellSize={50} onClick={onHome} />
+            <>
+              {page === "forest" && <APack text="Writing" cellSize={50} onClick={onWriting} />}
+              <button onClick={onHome} className="button primary-button">
+                Back
+              </button>
+            </>
           )}
         </div>
       )}
