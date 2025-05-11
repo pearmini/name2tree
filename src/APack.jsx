@@ -16,7 +16,6 @@ export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave, styl
 
   return (
     <div
-      className={"apack-button"}
       style={{
         padding: "2px",
         cursor: "pointer",
