@@ -14,7 +14,7 @@ function capitalizeFirstLetter(str) {
   return str;
 }
 
-export function Tree({isAdmin, onAdd, text, setText, onForest}) {
+export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
   const treeRef = useRef(null);
@@ -57,7 +57,11 @@ export function Tree({isAdmin, onAdd, text, setText, onForest}) {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
       const treeText = capitalizeFirstLetter(text || DEFAULT_TEXT);
-      treeRef.current.appendChild(tree(treeText, {grid: false}).render());
+      const node = tree(treeText, {grid: false}).render();
+      node.setAttribute("viewBox", "0 0 480 480");
+      node.style.width = "100%";
+      node.style.height = "100%";
+      treeRef.current.appendChild(node);
     }
   }, [text]);
 
@@ -107,8 +111,24 @@ export function Tree({isAdmin, onAdd, text, setText, onForest}) {
           />
         </div>
       </div>
-      <div style={{width: 480, height: 480, display: "flex", alignItems: "center", justifyContent: "center"}}>
-        <div ref={treeRef} style={{display: showQRCode ? "none" : "block"}}></div>
+      <div
+        style={{
+          width: 480,
+          height: 480,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          maxWidth: "80%",
+        }}
+      >
+        <div
+          ref={treeRef}
+          style={{
+            display: showQRCode ? "none" : "block",
+            width: "100%",
+            height: "100%",
+          }}
+        ></div>
         <div style={{width: "400px", height: "400px", display: showQRCode ? "block" : "none"}}>
           <AwesomeQRCode
             options={{
@@ -165,16 +185,27 @@ export function Tree({isAdmin, onAdd, text, setText, onForest}) {
             >
               ↓ PNG
             </button>
-            <button
-              className="button"
-              style={{fontSize: "14px"}}
-              onClick={() => downloadSVG(text, treeRef.current.querySelector("svg"))}
-            >
-              ↓ SVG
-            </button>
+            {isMobile ? (
+              <button
+                className="button"
+                style={{fontSize: "14px"}}
+                onClick={() => window.open("https://github.com/pearmini/string2tree", "_blank")}
+              >
+                Github
+              </button>
+            ) : (
+              <button
+                className="button"
+                style={{fontSize: "14px"}}
+                onClick={() => downloadSVG(text, treeRef.current.querySelector("svg"))}
+              >
+                ↓ SVG
+              </button>
+            )}
           </>
         )}
       </div>
+      {isMobile && <p style={{marginTop: "24px", fontSize: "14px"}}>Open in PC or Pad for more features.</p>}
       <p
         style={{
           visibility: tooltip ? "visible" : "hidden",
