@@ -12,7 +12,8 @@ import "./App.css";
 
 function initData() {
   const localNames = localStorage.getItem("names");
-  return localNames ? JSON.parse(localNames) : data;
+  const names = localNames && JSON.parse(localNames);
+  return names && names.length !== 0 ? names : data;
 }
 
 function uid() {
@@ -65,6 +66,10 @@ function App() {
 
   function onGithub() {
     window.open("https://github.com/pearmini/string2tree", "_blank");
+  }
+
+  function onInstagram() {
+    window.open("https://www.instagram.com/subairui24", "_blank");
   }
 
   return (
@@ -120,7 +125,12 @@ function App() {
               <APack text="Forest" cellSize={50} onClick={onForest} />
               <APack text="Write" cellSize={50} onClick={onWriting} />
               <APack text="About" cellSize={50} onClick={onAbout} />
-              {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
+              {!isAdmin && (
+                <>
+                  <APack text="Github" cellSize={50} onClick={onGithub} />
+                  <APack text="Instagram" cellSize={50} onClick={onInstagram} />
+                </>
+              )}
             </>
           ) : (
             <>
