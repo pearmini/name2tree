@@ -159,7 +159,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
             </button>
             <button
               onMouseEnter={() => {
-                setTooltip("Scan the QR code to download or share your tree!");
+                setTooltip("Scan the QR code to download your tree as image!");
                 setShowQRCode(true);
               }}
               onMouseLeave={() => {
