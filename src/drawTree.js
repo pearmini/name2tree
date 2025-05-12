@@ -71,7 +71,16 @@ function splitBy1And0(code) {
 
 export function tree(
   text,
-  {stroke = "black", grid = false, padding = 20, number = true, stamp = true, count = false, line = true} = {},
+  {
+    stroke = "black",
+    grid = false,
+    padding = 20,
+    number = true,
+    stamp = true,
+    count = false,
+    line = true,
+    end = true,
+  } = {},
 ) {
   const width = 480;
   const height = 480;
@@ -221,8 +230,9 @@ export function tree(
       totalLength -= padding;
     }
 
+    const start = end ? width - totalLength : width / 2 + padding;
     textNode = cm.svg("g", {
-      transform: `translate(${width - totalLength}, ${baselineY - cellSize - 5})`,
+      transform: `translate(${start}, ${baselineY - cellSize - 5})`,
       children: [apack.text(text, {cellSize, word: {strokeWidth: 1.5}})],
     });
   } catch (e) {

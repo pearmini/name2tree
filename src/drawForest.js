@@ -3,6 +3,37 @@ import {cm} from "./cm.js";
 import {tree} from "./drawTree.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 
+function extend(nodes) {
+  const minX = Math.min(...nodes.map((d) => d.x - 240));
+  const minY = Math.min(...nodes.map((d) => d.y - 240));
+  const maxX = Math.max(...nodes.map((d) => d.x + 240));
+  const maxY = Math.max(...nodes.map((d) => d.y + 240));
+  return {minX, minY, maxX, maxY};
+}
+
+function scaleY(nodes, aspect) {
+  const {minX, minY, maxX, maxY} = extend(nodes);
+  const width = maxX - minX;
+  const expectedHeight = width / aspect;
+  const y = d3.scaleLinear().domain([minY, maxY]).range([0, expectedHeight]);
+  nodes.forEach((d) => (d.y = y(d.y)));
+}
+
+function randomize(nodes) {
+  nodes.forEach((d) => {
+    const seed = d.name
+      .split("")
+      .map((c) => c.charCodeAt(0))
+      .join("");
+    const random = d3.randomUniform.source(d3.randomLcg(+seed));
+    const r = random(-240, 240);
+    d.x += r();
+    d.y += r();
+  });
+}
+
+const positionByIndex = new Map();
+
 function wordCloud(nodes, {increase = 10, padding = 20} = {}) {
   const widthOf = (page) => page.width + padding * 2;
   const heightOf = (page) => page.height + padding * 2;
@@ -26,6 +57,11 @@ function wordCloud(nodes, {increase = 10, padding = 20} = {}) {
   }
 
   function allocate(word, index, array) {
+    if (positionByIndex.has(index)) {
+      setX(word, positionByIndex.get(index).x);
+      setY(word, positionByIndex.get(index).y);
+      return;
+    }
     if (index === 0) {
       setX(word, 0);
       setY(word, 0);
@@ -38,6 +74,7 @@ function wordCloud(nodes, {increase = 10, padding = 20} = {}) {
       const y = Math.round(r * Math.cos((degree * Math.PI) / 180));
       setX(word, x);
       setY(word, y);
+      positionByIndex.set(index, {x, y});
       degree += 1;
       degree >= 360 && ((r += increase), (degree = 0));
     } while (hasOverLap(word, index, array));
@@ -46,42 +83,21 @@ function wordCloud(nodes, {increase = 10, padding = 20} = {}) {
   return nodes;
 }
 
-function extend(nodes) {
-  const minX = Math.min(...nodes.map((d) => d.x - 240));
-  const minY = Math.min(...nodes.map((d) => d.y - 240));
-  const maxX = Math.max(...nodes.map((d) => d.x + 240));
-  const maxY = Math.max(...nodes.map((d) => d.y + 240));
-  return {minX, minY, maxX, maxY};
-}
-
-function scaleY(nodes, aspect) {
-  const {minX, minY, maxX, maxY} = extend(nodes);
-  const width = maxX - minX;
-  const expectedHeight = width / aspect;
-  console.log("height before", maxY - minY);
-  const y = d3.scaleLinear().domain([minY, maxY]).range([0, expectedHeight]);
-  nodes.forEach((d) => (d.y = y(d.y)));
-}
-
-function randomize(nodes) {
-  nodes.forEach((d) => {
-    d.x += d3.randomUniform(-240, 240)();
-    d.y += d3.randomUniform(-240, 240)();
-  });
+function layout(cells, {width, height}) {
+  wordCloud(cells);
+  randomize(cells);
+  scaleY(cells, width / height);
 }
 
 export function forest(names, {selectedIndex} = {}) {
   const cells = names.map((d) => ({width: 480, height: 480, x: 0, y: 0, name: d}));
   const styleWidth = window.innerWidth;
   const styleHeight = window.innerHeight;
-  wordCloud(cells);
-  randomize(cells);
-  scaleY(cells, styleWidth / styleHeight);
+  layout(cells, {width: styleWidth, height: styleHeight});
 
   const {minX, minY, maxX, maxY} = extend(cells);
   const width = maxX - minX;
   const height = maxY - minY;
-  console.log("height after", width / height, styleWidth / styleHeight);
 
   const center = [width / 2, height / 2, width];
   const to = (end) => move(current, end);
@@ -145,6 +161,7 @@ export function forest(names, {selectedIndex} = {}) {
                 padding: 0,
                 number: false,
                 line: false,
+                end: false,
                 // stamp: false,
               }),
           }),
@@ -156,7 +173,7 @@ export function forest(names, {selectedIndex} = {}) {
             fill: "transparent",
             styleCursor: "pointer",
             strokeWidth: 2,
-            onclick: handleViewportClick,
+            // onclick: handleViewportClick,
           }),
         ],
       }),
