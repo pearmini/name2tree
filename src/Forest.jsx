@@ -72,6 +72,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   const [selectedId, setSelectedId] = useState(null);
   const selectedName = names.find((name) => name.id === selectedId);
   const [forestView, setForestView] = useState(false);
+  const [loading, setLoading] = useState(false);
   const forestRef = useRef(null);
 
   function onClickTree(id) {
@@ -128,10 +129,14 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
 
   useEffect(() => {
     if (forestRef.current) {
-      forestRef.current.innerHTML = "";
-      const root = forest(names.map((d) => d.name));
-      const node = root.render();
-      forestRef.current.appendChild(node);
+      setLoading(true);
+      setTimeout(() => {
+        forestRef.current.innerHTML = "";
+        const root = forest(names.map((d) => d.name));
+        const node = root.render();
+        forestRef.current.appendChild(node);
+        setLoading(false);
+      }, 100);
     }
   }, [names, forestView]);
 
@@ -176,7 +181,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
         }}
         onClick={() => setForestView(!forestView)}
       >
-        {forestView ? "Grid View" : "Forest View"}
+        {loading ? "Rendering..." : forestView ? "Grid View" : "Forest View"}
       </button>
       {forestView ? (
         <div

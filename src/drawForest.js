@@ -171,7 +171,7 @@ export function forest(names, {selectedIndex} = {}) {
             x: (d) => d.x - 240,
             y: (d) => d.y - 240,
             fill: "transparent",
-            styleCursor: "pointer",
+            // styleCursor: "pointer",
             strokeWidth: 2,
             // onclick: handleViewportClick,
           }),
