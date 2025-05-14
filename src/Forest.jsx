@@ -6,7 +6,7 @@ import {AwesomeQRCode} from "@awesomeqr/react";
 import {BACKGROUND_COLOR} from "./constants.js";
 import {forest} from "./drawForest.js";
 
-function TreeModal({name, onClose}) {
+function TreeModal({name, onClose, isAdmin}) {
   const [showQRCode, setShowQRCode] = useState(false);
   const qrCodeUrl = "https://tree.bairui.dev/?text=" + encodeURIComponent(name);
 
@@ -55,14 +55,16 @@ function TreeModal({name, onClose}) {
         ) : (
           <TreeItem name={name} />
         )}
-        <button
-          onMouseEnter={() => setShowQRCode(true)}
-          onMouseLeave={() => setShowQRCode(false)}
-          className="button primary-button"
-          style={{position: "absolute", top: 0, right: 0}}
-        >
-          Download
-        </button>
+        {isAdmin && (
+          <button
+            onMouseEnter={() => setShowQRCode(true)}
+            onMouseLeave={() => setShowQRCode(false)}
+            className="button primary-button"
+            style={{position: "absolute", top: 0, right: 0}}
+          >
+            Download
+          </button>
+        )}
       </div>
     </div>
   );
@@ -228,7 +230,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
               />
             ))}
           </div>
-          {selectedName && <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} />}
+          {selectedName && <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} isAdmin={isAdmin} />}
         </>
       )}
     </>
