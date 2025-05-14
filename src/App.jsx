@@ -44,7 +44,11 @@ function App() {
   }
 
   function onWriting() {
-    setPage("write");
+    if (isAdmin) {
+      setPage("write");
+    } else {
+      window.open("https://apack.bairui.dev/", "_blank");
+    }
   }
 
   function onAbout() {
