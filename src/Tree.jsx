@@ -21,6 +21,8 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   const inputRef = useRef(null);
   const [tooltip, setTooltip] = useState("");
   const [showQRCode, setShowQRCode] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef(null);
   const inputStyle = {
     fontSize: isAdmin ? "24px" : "16px",
     fontFamily: "monospace",
@@ -32,6 +34,19 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
     const value = e.target.value;
     setText(value);
     updateInputWidth(e.target, value);
+    
+    // Set typing state to true when user types
+    setIsTyping(true);
+    
+    // Clear any existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set a new timeout to hide the hint after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+    }, 1000);
   };
 
   const handleAdd = () => {
@@ -77,6 +92,15 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
     }
   }, [text]);
 
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -94,7 +118,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
           alignItems: "center",
         }}
       >
-        <div>
+        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
           <input
             ref={inputRef}
             className="input"
@@ -110,6 +134,9 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
               ...inputStyle,
             }}
           />
+          <p style={{marginTop: "10px", fontStyle: "italic", visibility: isTyping && text ? "visible" : "hidden"}}>
+            {text ? "Try changing cases, or adding/removing spaces between the words!" : "W"}
+          </p>
         </div>
       </div>
       <div
