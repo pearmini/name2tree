@@ -119,12 +119,8 @@ function App() {
           {page === "tree" ? (
             <>
               <APack text="Forest" cellSize={50} onClick={onForest} />
-              <APack text="Write" cellSize={50} onClick={onWriting} />
-              {!isAdmin && (
-                <>
-                  <APack text="Github" cellSize={50} onClick={onGithub} />
-                </>
-              )}
+              {isAdmin && <APack text="Write" cellSize={50} onClick={onWriting} />}
+              {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
               <APack text="About" cellSize={50} onClick={onAbout} />
             </>
           ) : (
