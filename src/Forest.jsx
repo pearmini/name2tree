@@ -28,8 +28,8 @@ function TreeModal({name, onClose, isAdmin}) {
     >
       <div
         style={{
-          width: "80vmin",
-          height: "80vmin",
+          width: !isAdmin ? "60vmin" : "80vmin",
+          height: !isAdmin ? "60vmin" : "80vmin",
           overflow: "hidden",
           display: "flex",
           justifyContent: "center",
