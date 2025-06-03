@@ -72,10 +72,6 @@ function App() {
     window.open("https://github.com/pearmini/string2tree", "_blank");
   }
 
-  function onInstagram() {
-    window.open("https://www.instagram.com/subairui24", "_blank");
-  }
-
   return (
     <div
       style={{
@@ -120,21 +116,16 @@ function App() {
             transform: "translateY(50%)",
           }}
         >
-          {/* <APack text="Tree" cellSize={40} onClick={onHome} />
-        <APack text="Forest" cellSize={40} onClick={onForest} />
-        <APack text="Write" cellSize={40} onClick={onWriting} />
-        <APack text="About" cellSize={40} onClick={onAbout} /> */}
           {page === "tree" ? (
             <>
               <APack text="Forest" cellSize={50} onClick={onForest} />
               <APack text="Write" cellSize={50} onClick={onWriting} />
-              <APack text="About" cellSize={50} onClick={onAbout} />
               {!isAdmin && (
                 <>
                   <APack text="Github" cellSize={50} onClick={onGithub} />
-                  <APack text="Instagram" cellSize={50} onClick={onInstagram} />
                 </>
               )}
+              <APack text="About" cellSize={50} onClick={onAbout} />
             </>
           ) : (
             <>
