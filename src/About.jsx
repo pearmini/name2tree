@@ -1,23 +1,34 @@
 import {TreeItem} from "./TreeItem.jsx";
 import "./About.css";
 
-function Details() {
+function Details({isAdmin}) {
+  const maybeLink = (text, link) =>
+    !isAdmin ? (
+      <a href={link} style={{color: "inherit"}}>
+        {text}
+      </a>
+    ) : (
+      text
+    );
   return (
     <ul style={{fontSize: "14px", height: "90%"}}>
       <li style={{paddingBottom: "10px"}}>
-        <span>Name2Tree: tree.bairui.dev</span>
+        <span>{maybeLink("GitHub: Source Code", "https://github.com/pearmini")}</span>
+      </li>
+      {isAdmin && (
+        <li style={{paddingBottom: "10px"}}>
+          <span>{maybeLink("Name2Tree", "https://tree.bairui.dev")}</span>
+        </li>
+      )}
+      <li style={{paddingBottom: "10px"}}>
+        <span>{maybeLink("APack: Signature Generator", "https://apack.bairui.dev")}</span>
       </li>
       <li style={{paddingBottom: "10px"}}>
-        <span>APack: apack.bairui.dev</span>
+        <span>{maybeLink("Charming.js: SVG Based Library", "https://charmingjs.org")}</span>
       </li>
+
       <li style={{paddingBottom: "10px"}}>
-        <span>Charming.js: charmingjs.org</span>
-      </li>
-      <li style={{paddingBottom: "10px"}}>
-        <span>GitHub: @pearmini</span>
-      </li>
-      <li style={{paddingBottom: "10px"}}>
-        <span>Instagram: @subairui24</span>
+        <span>{maybeLink("Instagram: follow my works!", "https://www.instagram.com/subairui24")}</span>
       </li>
     </ul>
   );
@@ -70,7 +81,7 @@ function ToASCII() {
   );
 }
 
-export function About() {
+export function About({isAdmin}) {
   return (
     <div className="about-container">
       <div className="features-flex">
@@ -99,7 +110,7 @@ export function About() {
           </div>
           <div className="feature-square">
             <span>6.More details...</span>
-            <Details />
+            <Details isAdmin={isAdmin} />
           </div>
         </div>
       </div>
