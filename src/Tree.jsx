@@ -34,15 +34,15 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
     const value = e.target.value;
     setText(value);
     updateInputWidth(e.target, value);
-    
+
     // Set typing state to true when user types
     setIsTyping(true);
-    
+
     // Clear any existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     // Set a new timeout to hide the hint after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
@@ -134,7 +134,14 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
               ...inputStyle,
             }}
           />
-          <p style={{marginTop: "10px", fontStyle: "italic", visibility: isTyping && text ? "visible" : "hidden"}}>
+          <p
+            style={{
+              marginTop: "10px",
+              fontStyle: "italic",
+              textAlign: "center",
+              visibility: isTyping && text ? "visible" : "hidden",
+            }}
+          >
             {text ? "Try changing cases, or adding/removing spaces between the words!" : "W"}
           </p>
         </div>
