@@ -2,6 +2,7 @@ import {useState} from "react";
 import {Tree} from "./Tree.jsx";
 import {Forest} from "./Forest.jsx";
 import {APack} from "./APack.jsx";
+import {Viz} from "./Viz.jsx";
 import {Writing} from "./Writing.jsx";
 import {About} from "./About.jsx";
 import {BACKGROUND_COLOR} from "./constants.js";
@@ -33,6 +34,9 @@ function App() {
   const [text, setText] = useState("");
   const [names, setNames] = useState(initData());
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const showMenu = !isMobile && page === "tree";
+  const showBack = !isMobile && page !== "tree";
+  const showBackMiddle = page !== "visualize";
 
   function onHome() {
     setPage("tree");
@@ -41,6 +45,10 @@ function App() {
 
   function onForest() {
     setPage("forest");
+  }
+
+  function onVisualize() {
+    setPage("visualize");
   }
 
   function onWriting() {
@@ -102,7 +110,8 @@ function App() {
       )}
       {page === "write" && <Writing isAdmin={isAdmin} />}
       {page === "about" && <About isAdmin={isAdmin} />}
-      {!isMobile && (
+      {page === "visualize" && <Viz names={names} />}
+      {showMenu && (
         <div
           style={{
             position: "fixed",
@@ -116,21 +125,29 @@ function App() {
             transform: "translateY(50%)",
           }}
         >
-          {page === "tree" ? (
-            <>
-              <APack text="Forest" cellSize={50} onClick={onForest} />
-              {isAdmin && <APack text="Write" cellSize={50} onClick={onWriting} />}
-              {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
-              <APack text="About" cellSize={50} onClick={onAbout} />
-            </>
-          ) : (
-            <>
-              {page === "forest" && <APack text="Writing" cellSize={50} onClick={onWriting} />}
-              <button onClick={onHome} className="button primary-button">
-                Back
-              </button>
-            </>
-          )}
+          <APack text="Forest" cellSize={50} onClick={onForest} />
+          <APack text="Viz" cellSize={50} onClick={onVisualize} />
+          {isAdmin && <APack text="Write" cellSize={50} onClick={onWriting} />}
+          <APack text="About" cellSize={50} onClick={onAbout} />
+          {!isAdmin && <APack text="Github" cellSize={50} onClick={onGithub} />}
+        </div>
+      )}
+      {showBack && (
+        <div
+          style={
+            showBackMiddle
+              ? {
+                  position: "fixed",
+                  right: "20px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                }
+              : {position: "fixed", right: "20px", top: "20px"}
+          }
+        >
+          <button onClick={onHome} className="button primary-button">
+            Back
+          </button>
         </div>
       )}
     </div>

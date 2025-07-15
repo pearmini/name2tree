@@ -1,10 +1,9 @@
-import {useEffect, useState, useRef} from "react";
+import {useEffect, useState} from "react";
 import {saveToLocalStorage} from "./file.js";
 import {TreeItem} from "./TreeItem.jsx";
 import QRCODE from "./qrcode.png";
 import {AwesomeQRCode} from "@awesomeqr/react";
 import {BACKGROUND_COLOR} from "./constants.js";
-import {forest} from "./drawForest.js";
 
 function TreeModal({name, onClose, isAdmin}) {
   const [showQRCode, setShowQRCode] = useState(false);
@@ -73,9 +72,6 @@ function TreeModal({name, onClose, isAdmin}) {
 export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedIndex}) {
   const [selectedId, setSelectedId] = useState(null);
   const selectedName = names.find((name) => name.id === selectedId);
-  const [forestView, setForestView] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const forestRef = useRef(null);
 
   function onClickTree(id) {
     setSelectedId(id);
@@ -130,19 +126,6 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   };
 
   useEffect(() => {
-    if (forestRef.current) {
-      setLoading(true);
-      setTimeout(() => {
-        forestRef.current.innerHTML = "";
-        const root = forest(names.map((d) => d.name));
-        const node = root.render();
-        forestRef.current.appendChild(node);
-        setLoading(false);
-      }, 100);
-    }
-  }, [names, forestView]);
-
-  useEffect(() => {
     // cmd + s: save to local storage
     // cmd + d: download to file
     // cmd + c: clear local storage
@@ -173,29 +156,8 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
 
   return (
     <>
-      <button
-        className="button primary-button"
-        style={{
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          zIndex: 1000,
-        }}
-        onClick={() => setForestView(!forestView)}
-      >
-        {loading ? "Rendering..." : forestView ? "Grid View" : "Forest View"}
-      </button>
-      {forestView ? (
-        <div
-          ref={forestRef}
-          style={{
-            transform: `translate(-40px, 0)`,
-          }}
-        ></div>
-      ) : (
-        <>
-          <style>
-            {`
+      <style>
+        {`
           @keyframes fadeIn {
             0% {
               opacity: 0.5;
@@ -207,32 +169,30 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
             }
           }
         `}
-          </style>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-              gap: "0px",
-              padding: "0px 100px 100px 100px",
-              width: "100vw",
-              height: "100vh",
-              overflow: "auto",
-            }}
-          >
-            {names.map((name, index) => (
-              <TreeItem
-                key={name.id}
-                name={name.name}
-                onClick={() => onClickTree(name.id)}
-                options={{padding: 0, number: false}}
-                style={{cursor: "pointer"}}
-                isSelected={index === selectedIndex}
-              />
-            ))}
-          </div>
-          {selectedName && <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} isAdmin={isAdmin} />}
-        </>
-      )}
+      </style>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+          gap: "0px",
+          padding: "0px 100px 100px 100px",
+          width: "100vw",
+          height: "100vh",
+          overflow: "auto",
+        }}
+      >
+        {names.map((name, index) => (
+          <TreeItem
+            key={name.id || name.name || index}
+            name={name.name}
+            onClick={() => onClickTree(name.id)}
+            options={{padding: 0, number: false}}
+            style={{cursor: "pointer"}}
+            isSelected={index === selectedIndex}
+          />
+        ))}
+      </div>
+      {selectedName && <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} isAdmin={isAdmin} />}
     </>
   );
 }
