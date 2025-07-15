@@ -210,6 +210,19 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
           </>
         ) : (
           <>
+            <button
+              onClick={() => {
+                window.open("https://github.com/pearmini/name2tree/edit/main/src/names.json", "_blank");
+              }}
+              onMouseEnter={() => setTooltip("Create a Pull Request to add your name to the Forest!")}
+              onMouseLeave={() => setTooltip("")}
+              className="button primary-button"
+              style={{
+                fontSize: "14px",
+              }}
+            >
+              Add to Forest
+            </button>
             <button className="button" style={{fontSize: "14px"}} onClick={() => onForest()}>
               Explore Forest
             </button>
