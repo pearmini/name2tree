@@ -89,7 +89,7 @@ function layout(cells, {width, height}) {
   scaleY(cells, width / height);
 }
 
-export function forest(names, {selectedIndex} = {}) {
+export function forest(names) {
   const cells = names.map((d) => ({width: 480, height: 480, x: 0, y: 0, name: d}));
   const styleWidth = window.innerWidth;
   const styleHeight = window.innerHeight;
@@ -156,8 +156,6 @@ export function forest(names, {selectedIndex} = {}) {
             transform: (d) => `translate(${d.x - 240}, ${d.y - 240})`,
             children: (d, index) =>
               tree(d.name, {
-                stroke: index === selectedIndex ? "red" : "black",
-                grid: index === selectedIndex,
                 padding: 0,
                 number: false,
                 line: false,
