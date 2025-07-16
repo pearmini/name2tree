@@ -6,14 +6,6 @@ import {AwesomeQRCode} from "@awesomeqr/react";
 import QRCODE from "./qrcode.png";
 import {downloadPNG, downloadSVG} from "./file.js";
 
-function capitalizeFirstLetter(str) {
-  // return str
-  //   .split(" ")
-  //   .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-  //   .join(" ");
-  return str;
-}
-
 export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
@@ -71,7 +63,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   useEffect(() => {
     if (treeRef.current) {
       treeRef.current.innerHTML = "";
-      const treeText = capitalizeFirstLetter(text || DEFAULT_TEXT);
+      const treeText = text || DEFAULT_TEXT;
       const node = tree(treeText, {grid: false}).render();
       node.setAttribute("viewBox", "0 0 480 480");
       node.style.width = "100%";
@@ -105,18 +97,32 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [modalShowNumbers, setModalShowNumbers] = useState(true);
   const [modalShowSignature, setModalShowSignature] = useState(true);
+  const [modalShowPlotter, setModalShowPlotter] = useState(false);
   const modalTreeRef = useRef(null);
   // Render tree in modal when open or when number switch changes
   useEffect(() => {
     if (showDownloadModal && modalTreeRef.current) {
       modalTreeRef.current.innerHTML = "";
-      const svg = tree(text, {grid: false, number: modalShowNumbers, stamp: modalShowSignature}).render();
+      const svg = tree(text, {grid: false, number: modalShowNumbers, stamp: modalShowSignature, plot: modalShowPlotter}).render();
       svg.style.width = "100%";
       svg.style.height = "100%";
       svg.setAttribute("viewBox", "0 0 480 480");
       modalTreeRef.current.appendChild(svg);
     }
-  }, [showDownloadModal, text, modalShowNumbers, modalShowSignature]);
+  }, [showDownloadModal, text, modalShowNumbers, modalShowSignature, modalShowPlotter]);
+
+  // Helper to generate filename with timestamp
+  function getDownloadFilename(base) {
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const y = now.getFullYear();
+    const m = pad(now.getMonth() + 1);
+    const d = pad(now.getDate());
+    const h = pad(now.getHours());
+    const min = pad(now.getMinutes());
+    const s = pad(now.getSeconds());
+    return `${base}-${y}${m}${d}-${h}${min}${s}`;
+  }
 
   return (
     <div
@@ -243,11 +249,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
             <button className="button" style={{fontSize: "14px"}} onClick={() => onForest()}>
               Explore Forest
             </button>
-            <button
-              className="button"
-              style={{fontSize: "14px"}}
-              onClick={() => setShowDownloadModal(true)}
-            >
+            <button className="button" style={{fontSize: "14px"}} onClick={() => setShowDownloadModal(true)}>
               Download
             </button>
             {isMobile ? (
@@ -295,10 +297,18 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
               boxSizing: "border-box",
               aspectRatio: "1/1",
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <button
-              style={{position: "absolute", top: 16, right: 24, fontSize: 20, background: "none", border: "none", cursor: "pointer"}}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 24,
+                fontSize: 20,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
               onClick={() => setShowDownloadModal(false)}
               aria-label="Close"
             >
@@ -310,7 +320,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
                 <input
                   type="checkbox"
                   checked={modalShowNumbers}
-                  onChange={e => setModalShowNumbers(e.target.checked)}
+                  onChange={(e) => setModalShowNumbers(e.target.checked)}
                   style={{width: 16, height: 16}}
                 />
                 Add number
@@ -319,24 +329,33 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
                 <input
                   type="checkbox"
                   checked={modalShowSignature}
-                  onChange={e => setModalShowSignature(e.target.checked)}
+                  onChange={(e) => setModalShowSignature(e.target.checked)}
                   style={{width: 16, height: 16}}
                 />
                 Add Signature
+              </label>
+              <label style={{display: "flex", alignItems: "center", gap: 8}}>
+                <input
+                  type="checkbox"
+                  checked={modalShowPlotter}
+                  onChange={(e) => setModalShowPlotter(e.target.checked)}
+                  style={{width: 16, height: 16}}
+                />
+                Plotter
               </label>
             </div>
             <div style={{display: "flex", gap: 12}}>
               <button
                 className="button"
                 style={{fontSize: "14px"}}
-                onClick={() => downloadPNG(text, modalTreeRef.current.querySelector("svg"))}
+                onClick={() => downloadPNG(getDownloadFilename(text), modalTreeRef.current.querySelector("svg"))}
               >
                 ↓ PNG
               </button>
               <button
                 className="button"
                 style={{fontSize: "14px"}}
-                onClick={() => downloadSVG(text, modalTreeRef.current.querySelector("svg"))}
+                onClick={() => downloadSVG(getDownloadFilename(text), modalTreeRef.current.querySelector("svg"))}
               >
                 ↓ SVG
               </button>
