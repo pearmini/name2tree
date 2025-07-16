@@ -101,6 +101,23 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
     };
   }, []);
 
+  // Download modal state
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [modalShowNumbers, setModalShowNumbers] = useState(true);
+  const [modalShowSignature, setModalShowSignature] = useState(true);
+  const modalTreeRef = useRef(null);
+  // Render tree in modal when open or when number switch changes
+  useEffect(() => {
+    if (showDownloadModal && modalTreeRef.current) {
+      modalTreeRef.current.innerHTML = "";
+      const svg = tree(text, {grid: false, number: modalShowNumbers, stamp: modalShowSignature}).render();
+      svg.style.width = "100%";
+      svg.style.height = "100%";
+      svg.setAttribute("viewBox", "0 0 480 480");
+      modalTreeRef.current.appendChild(svg);
+    }
+  }, [showDownloadModal, text, modalShowNumbers, modalShowSignature]);
+
   return (
     <div
       style={{
@@ -229,9 +246,9 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
             <button
               className="button"
               style={{fontSize: "14px"}}
-              onClick={() => downloadPNG(text, treeRef.current.querySelector("svg"))}
+              onClick={() => setShowDownloadModal(true)}
             >
-              ↓ PNG
+              Download
             </button>
             {isMobile ? (
               <button
@@ -241,18 +258,92 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
               >
                 Github
               </button>
-            ) : (
-              <button
-                className="button"
-                style={{fontSize: "14px"}}
-                onClick={() => downloadSVG(text, treeRef.current.querySelector("svg"))}
-              >
-                ↓ SVG
-              </button>
-            )}
+            ) : null}
           </>
         )}
       </div>
+      {/* Download Modal Overlay */}
+      {showDownloadModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowDownloadModal(false)}
+        >
+          <div
+            style={{
+              minWidth: 600,
+              minHeight: 600,
+              maxWidth: "90vw",
+              maxHeight: "90vw",
+              backgroundColor: BACKGROUND_COLOR,
+              borderRadius: "16px",
+              boxShadow: "0 4px 32px rgba(0,0,0,0.18)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              position: "relative",
+              boxSizing: "border-box",
+              aspectRatio: "1/1",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              style={{position: "absolute", top: 16, right: 24, fontSize: 20, background: "none", border: "none", cursor: "pointer"}}
+              onClick={() => setShowDownloadModal(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div ref={modalTreeRef} style={{width: 480, height: 480, marginBottom: 16}}></div>
+            <div style={{display: "flex", flexDirection: "row", gap: 24, marginBottom: 16}}>
+              <label style={{display: "flex", alignItems: "center", gap: 8}}>
+                <input
+                  type="checkbox"
+                  checked={modalShowNumbers}
+                  onChange={e => setModalShowNumbers(e.target.checked)}
+                  style={{width: 16, height: 16}}
+                />
+                Add number
+              </label>
+              <label style={{display: "flex", alignItems: "center", gap: 8}}>
+                <input
+                  type="checkbox"
+                  checked={modalShowSignature}
+                  onChange={e => setModalShowSignature(e.target.checked)}
+                  style={{width: 16, height: 16}}
+                />
+                Add Signature
+              </label>
+            </div>
+            <div style={{display: "flex", gap: 12}}>
+              <button
+                className="button"
+                style={{fontSize: "14px"}}
+                onClick={() => downloadPNG(text, modalTreeRef.current.querySelector("svg"))}
+              >
+                ↓ PNG
+              </button>
+              <button
+                className="button"
+                style={{fontSize: "14px"}}
+                onClick={() => downloadSVG(text, modalTreeRef.current.querySelector("svg"))}
+              >
+                ↓ SVG
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isMobile && <p style={{marginTop: "24px", fontSize: "14px"}}>Open in PC or Pad for more features.</p>}
       <p
         style={{
