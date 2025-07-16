@@ -1,7 +1,11 @@
 import * as d3 from "d3";
 import * as apack from "apackjs";
+import fonts from "./hersheytext.json";
 import {cm} from "./cm.js";
 import {BACKGROUND_COLOR} from "./constants.js";
+import rough from "roughjs";
+
+const roughSvg = rough.svg(document.createElement("svg"));
 
 function reduceDenominator(numerator, denominator) {
   const rec = (a, b) => (b ? rec(b, a % b) : a);
@@ -28,6 +32,80 @@ function ellipsis(text, maxLength) {
   const chars = Array.from(text);
   if (chars.length <= maxLength) return text;
   return chars.slice(0, maxLength).join("") + "...";
+}
+
+function roughCirclePath(r) {
+  const g = roughSvg.circle(0, 0, r * 2, {
+    fill: "black",
+    hachureGap: 2,
+    roughness: 0,
+  });
+  const path = g.firstElementChild;
+  const d = path.getAttribute("d");
+  return d;
+}
+
+function points(path) {
+  const plines = [];
+  let current = [];
+  let mode = "";
+  for (let t of path.split(" ")) {
+    if (t[0] === "M" || t[0] === "L") (mode = t[0]), (t = t.slice(1));
+    const coords = t.split(",").map(Number);
+    if (mode === "M" && current.length > 0) {
+      plines.push(current);
+      current = [];
+    }
+    current.push(coords);
+  }
+  plines.push(current);
+  return plines;
+}
+
+function pathWidth(number, points) {
+  const minX = Math.min(...points.flatMap((line) => line.map(([x]) => x)));
+  const maxX = Math.max(...points.flatMap((line) => line.map(([x]) => x)));
+  const offset = number === "1" ? 7 : 3;
+  return maxX - minX + offset;
+}
+
+function pathNumber(number) {
+  const idx = (ch) => ch.charCodeAt(0) - 33;
+  const font = fonts.futural["chars"];
+  const scale = 0.5;
+  const pathPLines = (n) => {
+    const raw = font[idx(n + "")]["d"];
+    const plines = points(raw);
+    const scaledPlines = plines.map((line) => line.map(([x, y]) => [x * scale, y * scale]));
+    return scaledPlines;
+  };
+  const path = (n) => {
+    const plines = pathPLines(n);
+    let d = "";
+    for (const line of plines) {
+      d += `M${line[0][0]},${line[0][1]}`;
+      for (const [x, y] of line.slice(1)) {
+        d += `L${x},${y}`;
+      }
+    }
+    return d;
+  };
+  const numbers = String(number).split("");
+  const translateX = new Array(numbers.length).fill(0);
+  for (let i = 1; i < numbers.length; i++) {
+    const n = numbers[i - 1];
+    translateX[i] = translateX[i - 1] + pathWidth(n, pathPLines(n));
+  }
+  const totalWidth = translateX[numbers.length - 1];
+  return cm.svg("g", {
+    transform: `translate(${-totalWidth}, 0)`,
+    children: [
+      cm.svg("path", String(number).split(""), {
+        d: (n) => path(n),
+        transform: (_, i) => `translate(${translateX[i]}, 0)`,
+      }),
+    ],
+  });
 }
 
 function toTree(codes) {
@@ -80,6 +158,7 @@ export function tree(
     count = false,
     line = true,
     end = true,
+    plot = false,
   } = {},
 ) {
   const width = 480;
@@ -213,6 +292,7 @@ export function tree(
   };
 
   let textNode = null;
+  let longMessage = false;
 
   try {
     const wordLength = text.split(" ").length;
@@ -236,6 +316,7 @@ export function tree(
       children: [apack.text(text, {cellSize, word: {strokeWidth: 1.5}})],
     });
   } catch (e) {
+    longMessage = true;
     textNode = cm.svg("text", {
       textContent: ellipsis(text, 18),
       x: "100%",
@@ -299,13 +380,21 @@ export function tree(
       tree &&
         cm.svg("g", circles, {
           transform: (d) => d.transform,
-          children: (d) => [
-            cm.svg("path", {
-              d: circlePath(d.r),
-              fill: "black",
-              stroke: "black",
-            }),
-          ],
+          children: (d) =>
+            [
+              plot &&
+                cm.svg("path", {
+                  d: roughCirclePath(d.r),
+                  strokeWidth: 1.5,
+                  fill: "transparent",
+                  stroke: "black",
+                }),
+              cm.svg("path", {
+                d: circlePath(d.r),
+                fill: plot ? "transparent" : "black",
+                stroke: "black",
+              }),
+            ].filter(Boolean),
         }),
       tree &&
         cm.svg("g", roses, {
@@ -317,7 +406,7 @@ export function tree(
             }),
           ],
         }),
-      stamp && textNode,
+      stamp && (plot ? (longMessage ? null : textNode) : textNode),
       count &&
         cm.svg("g", numbers, {
           transform: (d) => d.transform,
@@ -343,19 +432,26 @@ export function tree(
           stroke: "black",
           strokeWidth: 1.5,
         }),
-      number &&
-        cm.svg("text", {
-          id: "ascii",
-          textContent: ellipsis(ascii, 58),
-          x: "100%",
-          y: "100%",
-          dy: "-26",
-          dx: "-20",
-          textAnchor: "end",
-          fill: "black",
-          fontSize: 12,
-          fontFamily: "monospace",
-        }),
+      number && plot
+        ? cm.svg("g", {
+            transform: "translate(448, 448)",
+            stroke: "black",
+            strokeWidth: 1.5,
+            fill: "transparent",
+            children: [pathNumber(ellipsis(ascii, 40))],
+          })
+        : cm.svg("text", {
+            id: "ascii",
+            textContent: ellipsis(ascii, 58),
+            x: "100%",
+            y: "100%",
+            dy: "-26",
+            dx: "-20",
+            textAnchor: "end",
+            fill: "black",
+            fontSize: 12,
+            fontFamily: "monospace",
+          }),
     ].filter(Boolean),
   });
 
