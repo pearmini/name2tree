@@ -432,26 +432,27 @@ export function tree(
           stroke: "black",
           strokeWidth: 1.5,
         }),
-      number && plot
-        ? cm.svg("g", {
-            transform: "translate(448, 448)",
-            stroke: "black",
-            strokeWidth: 1.5,
-            fill: "transparent",
-            children: [pathNumber(ellipsis(ascii, 40))],
-          })
-        : cm.svg("text", {
-            id: "ascii",
-            textContent: ellipsis(ascii, 58),
-            x: "100%",
-            y: "100%",
-            dy: "-26",
-            dx: "-20",
-            textAnchor: "end",
-            fill: "black",
-            fontSize: 12,
-            fontFamily: "monospace",
-          }),
+      number &&
+        (plot
+          ? cm.svg("g", {
+              transform: "translate(448, 448)",
+              stroke: "black",
+              strokeWidth: 1.5,
+              fill: "transparent",
+              children: [pathNumber(ellipsis(ascii, 40))],
+            })
+          : cm.svg("text", {
+              id: "ascii",
+              textContent: ellipsis(ascii, 58),
+              x: "100%",
+              y: "100%",
+              dy: "-26",
+              dx: "-20",
+              textAnchor: "end",
+              fill: "black",
+              fontSize: 12,
+              fontFamily: "monospace",
+            })),
     ].filter(Boolean),
   });
 
