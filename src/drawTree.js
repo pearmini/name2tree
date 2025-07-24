@@ -3,9 +3,8 @@ import * as apack from "apackjs";
 import fonts from "./hersheytext.json";
 import {cm} from "./cm.js";
 import {BACKGROUND_COLOR} from "./constants.js";
-import rough from "roughjs";
-
-const roughSvg = rough.svg(document.createElement("svg"));
+import {hachureLines} from "hachure-fill";
+import {pointsOnPath} from "points-on-path";
 
 function reduceDenominator(numerator, denominator) {
   const rec = (a, b) => (b ? rec(b, a % b) : a);
@@ -34,14 +33,17 @@ function ellipsis(text, maxLength) {
   return chars.slice(0, maxLength).join("") + "...";
 }
 
-function roughCirclePath(r) {
-  const g = roughSvg.circle(0, 0, r * 2, {
-    fill: "black",
-    hachureGap: 2,
-    roughness: 0,
-  });
-  const path = g.firstElementChild;
-  const d = path.getAttribute("d");
+function circlePath(r) {
+  const path = d3.path();
+  path.arc(0, 0, r, 0, Math.PI * 2);
+  return path.toString();
+}
+
+function hachureCirclePath(r, options = {}) {
+  const path = circlePath(r);
+  const points = pointsOnPath(path);
+  const hachures = hachureLines(points, 2, 45);
+  const d = hachures.map(([p1, p2]) => `M${p1[0]},${p1[1]}L${p2[0]},${p2[1]}`).join("");
   return d;
 }
 
@@ -285,12 +287,6 @@ export function tree(
     context.pop();
   }
 
-  const circlePath = (r) => {
-    const path = d3.path();
-    path.arc(0, 0, r, 0, Math.PI * 2);
-    return path.toString();
-  };
-
   let textNode = null;
   let longMessage = false;
 
@@ -384,7 +380,7 @@ export function tree(
             [
               plot &&
                 cm.svg("path", {
-                  d: roughCirclePath(d.r),
+                  d: hachureCirclePath(d.r),
                   strokeWidth: 1.5,
                   fill: "transparent",
                   stroke: "black",
