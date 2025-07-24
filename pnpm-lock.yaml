@@ -23,6 +23,12 @@ importers:
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
+      hachure-fill:
+        specifier: ^0.5.2
+        version: 0.5.2
+      points-on-path:
+        specifier: ^0.2.1
+        version: 0.2.1
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
