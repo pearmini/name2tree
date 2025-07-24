@@ -130,22 +130,49 @@ function toTree(codes) {
   return data;
 }
 
-function splitBy1And0(code) {
+// example: 101103111 -> [['10', '1', '10'], '3111']
+// example: 2030 -> ['20', '30']
+// example: 1103045 -> ['1', '10', '30', '45']
+function trimDegenerateSegments(code) {
   const codes = [];
   let current = null;
   let i = 0;
+
+  const isValid = (current) => {
+    const isStartWith1 = current.startsWith("1");
+    const enoughZeros = +current[0] <= current.slice(1).length;
+    return isStartWith1 || enoughZeros;
+  };
+
   for (i = 0; i < code.length; i++) {
     const digit = +code[i];
-    if (!current && digit !== 1) break;
-    else if (!current && digit === 1) current = "" + digit;
+    const next = +code[i + 1];
+
+    // A degenerate segment is a segment starting with 1 or
+    // with trailing 0 which 0 count is getter than or equal to the first digit.
+    const isDegenerateSegment = digit === 1 || next === 0;
+
+    if (!current && !isDegenerateSegment) break;
+    else if (!current && isDegenerateSegment) current = "" + digit;
     else if (digit === 0) current += "" + digit;
     else {
-      codes.push(current);
-      current = digit === 1 ? "" + digit : null;
-      if (!current) break;
+      if (isValid(current)) {
+        codes.push(current);
+        current = isDegenerateSegment ? "" + digit : null;
+        if (!current) break;
+      } else {
+        i = i - current.length;
+        current = null;
+        break;
+      }
     }
   }
-  if (current) codes.push(current);
+
+  if (current) {
+    if (isValid(current)) codes.push(current);
+    else i = i - current.length;
+  }
+
   return [codes, code.slice(i)];
 }
 
@@ -183,7 +210,7 @@ export function tree(
     return Math.floor(random(min, max));
   }
 
-  const [flowers, tree] = splitBy1And0(ascii);
+  const [flowers, tree] = trimDegenerateSegments(ascii);
 
   const data = toTree(tree);
   const root = d3.hierarchy(data);
