@@ -149,7 +149,7 @@ function trimDegenerateSegments(code) {
     const next = +code[i + 1];
 
     // A degenerate segment is a segment starting with 1 or
-    // with trailing 0 which 0 count is less than the first digit.
+    // with trailing 0 which 0 count is getter than or equal to the first digit.
     const isDegenerateSegment = digit === 1 || next === 0;
 
     if (!current && !isDegenerateSegment) break;
