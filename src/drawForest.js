@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import {cm} from "./cm.js";
 import {tree} from "./drawTree.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 
@@ -89,92 +88,107 @@ function layout(cells, {width, height}) {
   scaleY(cells, width / height);
 }
 
-export function forest(names) {
+export function forest(names, {styleWidth = window.innerWidth, styleHeight = window.innerHeight} = {}) {
   const cells = names.map((d) => ({width: 480, height: 480, x: 0, y: 0, name: d}));
-  const styleWidth = window.innerWidth;
-  const styleHeight = window.innerHeight;
+
   layout(cells, {width: styleWidth, height: styleHeight});
 
   const {minX, minY, maxX, maxY} = extend(cells);
+
   const width = maxX - minX;
   const height = maxY - minY;
+  const size = Math.min(height, width);
+  const centerX = (maxX + minX) / 2;
+  const centerY = (maxY + minY) / 2;
 
-  const center = [width / 2, height / 2, width];
-  const to = (end) => move(current, end);
-
-  let current = center;
   let zooming = false;
 
-  function move(start, end) {
-    hideCellStroke();
+  const zoom = d3
+    .zoom()
+    .on("zoom", (e) => {
+      const transform = e.transform;
+      const selection = d3.select("#forest");
+      selection.attr("transform", transform);
+    })
+    .scaleExtent([1, size / 480])
+    .translateExtent([
+      [minX, minY],
+      [maxX, maxY],
+    ]);
 
+  function clicked(event, datum) {
     if (zooming) return;
     zooming = true;
 
-    // Make sure the center grid zoomable, for example: [720, 720, 360] -> [720, 720, 1440].
-    start = [start[0] - 0.1, start[1] - 0.1, start[2]];
+    const end = [datum.x, datum.y, 480];
+    const currentTransform = d3.select("#forest-container").property("__zoom");
+    const view2 = size / currentTransform.k;
+    const view0 = (centerX - currentTransform.x) / currentTransform.k;
+    const view1 = (centerY - currentTransform.y) / currentTransform.k;
+    const start = [view0, view1, view2];
 
     const interpolator = d3.interpolateZoom(start, end);
     const duration = interpolator.duration * 1.2;
     const selection = d3.select("#forest");
     const transform = (t) => {
       const view = interpolator(t);
-      const k = width / view[2]; // scale
-      const translate = [width / 2 - view[0] * k, height / 2 - view[1] * k]; // translate
+      const k = size / view[2]; // scale
+      const translate = [centerX - view[0] * k, centerY - view[1] * k]; // translate
       return `translate(${translate}) scale(${k})`;
     };
 
-    selection
+    const transition = selection
       .transition()
       .duration(duration)
-      .attrTween("transform", () => transform)
-      .end()
-      .then(() => ((zooming = false), (current = end)));
+      .attrTween("transform", () => transform);
+
+    transition.end().then(() => {
+      zooming = false;
+
+      // Sync the zoom state to the container, so after the transition,
+      // the zoom behavior is consistent.
+      const k = size / end[2];
+      const tx = centerX - end[0] * k;
+      const ty = centerY - end[1] * k;
+
+      const transform = d3.zoomIdentity.translate(tx, ty).scale(k);
+      zoom.transform(selection, transform);
+
+      const container = d3.select("#forest-container");
+      container.property("__zoom", selection.property("__zoom"));
+    });
   }
 
-  function hideCellStroke() {
-    d3.selectAll(".tree-bg").style("stroke", "none");
-  }
+  const svg = d3
+    .create("svg")
+    .attr("viewBox", `${minX} ${minY} ${width} ${height}`)
+    .attr("width", styleWidth)
+    .attr("height", styleHeight)
+    .attr("style", `background: ${BACKGROUND_COLOR}`)
+    .attr("id", "forest-container")
+    .call(zoom); // Can't call on #forest, it's not smooth
 
-  function handleViewportClick(_, d, index) {
-    to(current === center ? viewports[index] : current === viewports[index] ? center : viewports[index]);
-  }
+  const grids = svg
+    .append("g")
+    .attr("id", "forest")
+    .attr("transform", "translate(0, 0) scale(1)")
+    .selectAll("g")
+    .data(cells)
+    .join("g")
+    .attr("transform", (d) => `translate(${d.x - 240}, ${d.y - 240})`);
 
-  const viewports = cells.map((d) => [d.x + 240, d.y + 240, 480]);
-
-  return cm.svg("svg", {
-    viewBox: `${minX} ${minY} ${width} ${height}`,
-    styleWidth,
-    styleHeight,
-    styleBackground: BACKGROUND_COLOR,
-    children: [
-      cm.svg("g", {
-        id: "forest",
-        transform: "translate(0, 0) scale(1)",
-        children: [
-          cm.svg("g", cells, {
-            transform: (d) => `translate(${d.x - 240}, ${d.y - 240})`,
-            children: (d, index) =>
-              tree(d.name, {
-                padding: 0,
-                number: false,
-                line: false,
-                end: false,
-                // stamp: false,
-              }),
-          }),
-          cm.svg("rect", cells, {
-            width: 480,
-            height: 480,
-            x: (d) => d.x - 240,
-            y: (d) => d.y - 240,
-            fill: "transparent",
-            // styleCursor: "pointer",
-            strokeWidth: 2,
-            // onclick: handleViewportClick,
-          }),
-        ],
-      }),
-    ],
+  grids.append("g").each(function (d, i) {
+    const treeNode = tree(d.name, {padding: 0, number: false, line: false, end: false});
+    this.appendChild(treeNode.render());
   });
+
+  grids
+    .append("rect")
+    .attr("width", 480)
+    .attr("height", 480)
+    .attr("fill", "transparent")
+    .attr("style", "cursor: pointer; stroke-width: 2;")
+    .on("click", clicked);
+
+  return svg.node();
 }
