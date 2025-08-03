@@ -89,10 +89,8 @@ function layout(cells, {width, height}) {
   scaleY(cells, width / height);
 }
 
-export function forest(names) {
+export function forest(names, {styleWidth = window.innerWidth, styleHeight = window.innerHeight} = {}) {
   const cells = names.map((d) => ({width: 480, height: 480, x: 0, y: 0, name: d}));
-  const styleWidth = window.innerWidth;
-  const styleHeight = window.innerHeight;
 
   layout(cells, {width: styleWidth, height: styleHeight});
 
