@@ -93,60 +93,87 @@ export function forest(names) {
   const cells = names.map((d) => ({width: 480, height: 480, x: 0, y: 0, name: d}));
   const styleWidth = window.innerWidth;
   const styleHeight = window.innerHeight;
+
   layout(cells, {width: styleWidth, height: styleHeight});
 
   const {minX, minY, maxX, maxY} = extend(cells);
+  const viewports = cells.map((d) => [d.x, d.y, 480]);
+
   const width = maxX - minX;
   const height = maxY - minY;
+  const size = Math.min(height, width);
+  const centerX = (maxX + minX) / 2;
+  const centerY = (maxY + minY) / 2;
 
-  const center = [width / 2, height / 2, width];
-  const to = (end) => move(current, end);
-
-  let current = center;
   let zooming = false;
 
-  function move(start, end) {
-    hideCellStroke();
+  const zoom = d3
+    .zoom()
+    .on("zoom", (e) => {
+      const transform = e.transform;
+      const selection = d3.select("#forest");
+      selection.attr("transform", transform);
+    })
+    .scaleExtent([1, size / 480])
+    .translateExtent([
+      [minX, minY],
+      [maxX, maxY],
+    ]);
 
+  // Can't call on #forest, it's not smooth
+  setTimeout(() => {
+    d3.select("#forest-container").call(zoom);
+  }, 100);
+
+  function clicked(event, _, index) {
     if (zooming) return;
     zooming = true;
 
-    // Make sure the center grid zoomable, for example: [720, 720, 360] -> [720, 720, 1440].
-    start = [start[0] - 0.1, start[1] - 0.1, start[2]];
+    const end = viewports[index];
+    const currentTransform = d3.select("#forest-container").property("__zoom");
+    const view2 = size / currentTransform.k;
+    const view0 = (centerX - currentTransform.x) / currentTransform.k;
+    const view1 = (centerY - currentTransform.y) / currentTransform.k;
+    const start = [view0, view1, view2];
 
     const interpolator = d3.interpolateZoom(start, end);
     const duration = interpolator.duration * 1.2;
     const selection = d3.select("#forest");
     const transform = (t) => {
       const view = interpolator(t);
-      const k = width / view[2]; // scale
-      const translate = [width / 2 - view[0] * k, height / 2 - view[1] * k]; // translate
+      const k = size / view[2]; // scale
+      const translate = [centerX - view[0] * k, centerY - view[1] * k]; // translate
       return `translate(${translate}) scale(${k})`;
     };
 
-    selection
+    const transition = selection
       .transition()
       .duration(duration)
-      .attrTween("transform", () => transform)
-      .end()
-      .then(() => ((zooming = false), (current = end)));
-  }
+      .attrTween("transform", () => transform);
 
-  function hideCellStroke() {
-    d3.selectAll(".tree-bg").style("stroke", "none");
-  }
+    transition.end().then(() => {
+      zooming = false;
 
-  function handleViewportClick(_, d, index) {
-    to(current === center ? viewports[index] : current === viewports[index] ? center : viewports[index]);
-  }
+      // Sync the zoom state to the container, so after the transition,
+      // the zoom behavior is consistent.
+      const k = size / end[2];
+      const tx = centerX - end[0] * k;
+      const ty = centerY - end[1] * k;
 
-  const viewports = cells.map((d) => [d.x + 240, d.y + 240, 480]);
+      const transform = d3.zoomIdentity.translate(tx, ty).scale(k);
+      zoom.transform(selection, transform);
+
+      const container = d3.select("#forest-container");
+      container.property("__zoom", selection.property("__zoom"));
+    });
+  }
 
   return cm.svg("svg", {
     viewBox: `${minX} ${minY} ${width} ${height}`,
     styleWidth,
     styleHeight,
     styleBackground: BACKGROUND_COLOR,
+    id: "forest-container",
     children: [
       cm.svg("g", {
         id: "forest",
@@ -160,7 +187,6 @@ export function forest(names) {
                 number: false,
                 line: false,
                 end: false,
-                // stamp: false,
               }),
           }),
           cm.svg("rect", cells, {
@@ -169,9 +195,9 @@ export function forest(names) {
             x: (d) => d.x - 240,
             y: (d) => d.y - 240,
             fill: "transparent",
-            // styleCursor: "pointer",
+            styleCursor: "pointer",
             strokeWidth: 2,
-            // onclick: handleViewportClick,
+            onclick: clicked,
           }),
         ],
       }),
