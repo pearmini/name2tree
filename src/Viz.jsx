@@ -13,11 +13,11 @@ export function Viz({names}) {
       setLoading(true);
       timeout = setTimeout(() => {
         forestRef.current.innerHTML = "";
-        const root = forest(
+        const node = forest(
           names.map((d) => d.name),
           {styleWidth: window.innerWidth, styleHeight: window.innerHeight - headerHeight},
         );
-        const node = root.render();
+        // const node = root.render();
         forestRef.current.appendChild(node);
         setLoading(false);
       }, 100);
@@ -39,7 +39,7 @@ export function Viz({names}) {
           padding: "0 20px",
         }}
       >
-        <h2 style={{marginBottom: 4}}>Tree Cloud: Place trees along a spiral path</h2>
+        <h2 style={{marginBottom: 4}}>Tree Cloud: Placing trees along a spiral path</h2>
         <p>Pan and zoom. Click to zoom to a specific tree.</p>
       </div>
       <div>

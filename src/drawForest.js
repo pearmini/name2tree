@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import {cm} from "./cm.js";
 import {tree} from "./drawTree.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 
@@ -95,7 +94,6 @@ export function forest(names, {styleWidth = window.innerWidth, styleHeight = win
   layout(cells, {width: styleWidth, height: styleHeight});
 
   const {minX, minY, maxX, maxY} = extend(cells);
-  const viewports = cells.map((d) => [d.x, d.y, 480]);
 
   const width = maxX - minX;
   const height = maxY - minY;
@@ -118,16 +116,11 @@ export function forest(names, {styleWidth = window.innerWidth, styleHeight = win
       [maxX, maxY],
     ]);
 
-  // Can't call on #forest, it's not smooth
-  setTimeout(() => {
-    d3.select("#forest-container").call(zoom);
-  }, 100);
-
-  function clicked(event, _, index) {
+  function clicked(event, datum) {
     if (zooming) return;
     zooming = true;
 
-    const end = viewports[index];
+    const end = [datum.x, datum.y, 480];
     const currentTransform = d3.select("#forest-container").property("__zoom");
     const view2 = size / currentTransform.k;
     const view0 = (centerX - currentTransform.x) / currentTransform.k;
@@ -166,39 +159,36 @@ export function forest(names, {styleWidth = window.innerWidth, styleHeight = win
     });
   }
 
-  return cm.svg("svg", {
-    viewBox: `${minX} ${minY} ${width} ${height}`,
-    styleWidth,
-    styleHeight,
-    styleBackground: BACKGROUND_COLOR,
-    id: "forest-container",
-    children: [
-      cm.svg("g", {
-        id: "forest",
-        transform: "translate(0, 0) scale(1)",
-        children: [
-          cm.svg("g", cells, {
-            transform: (d) => `translate(${d.x - 240}, ${d.y - 240})`,
-            children: (d, index) =>
-              tree(d.name, {
-                padding: 0,
-                number: false,
-                line: false,
-                end: false,
-              }),
-          }),
-          cm.svg("rect", cells, {
-            width: 480,
-            height: 480,
-            x: (d) => d.x - 240,
-            y: (d) => d.y - 240,
-            fill: "transparent",
-            styleCursor: "pointer",
-            strokeWidth: 2,
-            onclick: clicked,
-          }),
-        ],
-      }),
-    ],
+  const svg = d3
+    .create("svg")
+    .attr("viewBox", `${minX} ${minY} ${width} ${height}`)
+    .attr("width", styleWidth)
+    .attr("height", styleHeight)
+    .attr("style", `background: ${BACKGROUND_COLOR}`)
+    .attr("id", "forest-container")
+    .call(zoom); // Can't call on #forest, it's not smooth
+
+  const grids = svg
+    .append("g")
+    .attr("id", "forest")
+    .attr("transform", "translate(0, 0) scale(1)")
+    .selectAll("g")
+    .data(cells)
+    .join("g")
+    .attr("transform", (d) => `translate(${d.x - 240}, ${d.y - 240})`);
+
+  grids.append("g").each(function (d, i) {
+    const treeNode = tree(d.name, {padding: 0, number: false, line: false, end: false});
+    this.appendChild(treeNode.render());
   });
+
+  grids
+    .append("rect")
+    .attr("width", 480)
+    .attr("height", 480)
+    .attr("fill", "transparent")
+    .attr("style", "cursor: pointer; stroke-width: 2;")
+    .on("click", clicked);
+
+  return svg.node();
 }
