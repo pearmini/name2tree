@@ -6,7 +6,7 @@ export function Viz({names}) {
   const [loading, setLoading] = useState(false);
   const forestRef = useRef(null);
   const layoutRef = useRef(null);
-  const [selectedLayout, setSelectedLayout] = useState("grid");
+  const [selectedLayout, setSelectedLayout] = useState("cloud");
   const [sortBy, setSortBy] = useState("time-asc");
   const headerHeight = 68;
 
