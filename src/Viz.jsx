@@ -6,7 +6,7 @@ export function Viz({names}) {
   const [loading, setLoading] = useState(false);
   const forestRef = useRef(null);
   const layoutRef = useRef(null);
-  const [selectedLayout, setSelectedLayout] = useState("cloud");
+  const [selectedLayout, setSelectedLayout] = useState("swarm");
   const [sortBy, setSortBy] = useState("time-asc");
   const headerHeight = 68;
 
@@ -20,6 +20,11 @@ export function Viz({names}) {
       return {
         title: "Tree Grid: Placing trees in a grid",
         description: "Pan and zoom. Click to zoom to a specific tree.",
+      };
+    } else if (selectedLayout === "swarm") {
+      return {
+        title: "Tree Swarm: Placing trees along an the timeline",
+        description: "Explore when people added their trees in ITP Spring Show 2025.",
       };
     }
   }, [selectedLayout]);
@@ -90,6 +95,7 @@ export function Viz({names}) {
             <select className="select" value={selectedLayout} onChange={(e) => setSelectedLayout(e.target.value)}>
               <option value="cloud">Cloud</option>
               <option value="grid">Grid</option>
+              <option value="swarm">Swarm</option>
             </select>
           </div>
         </div>
@@ -104,7 +110,12 @@ export function Viz({names}) {
             }}
           >
             <div
-              style={{transform: "translate(-50%, -50%)", background: BACKGROUND_COLOR, padding: 10, borderRadius: 4}}
+              style={{
+                transform: "translate(-50%, -50%)",
+                background: BACKGROUND_COLOR,
+                padding: 10,
+                border: "1px solid black",
+              }}
             >
               Rendering...
             </div>

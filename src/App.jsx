@@ -13,9 +13,9 @@ import "./App.css";
 import {Routes, Route, useLocation, useNavigate, Link} from "react-router-dom";
 
 function initData() {
-  const localNames = localStorage.getItem("names");
-  const names = localNames && JSON.parse(localNames);
-  return names && names.length !== 0 ? names : data;
+  // const localNames = localStorage.getItem("names");
+  // const names = localNames && JSON.parse(localNames);
+  return data;
 }
 
 function uid() {
