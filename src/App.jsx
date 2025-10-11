@@ -143,7 +143,7 @@ function App() {
               : {position: "fixed", right: "20px", top: "20px"}
           }
         >
-          <button onClick={() => navigate("/")} className="button primary-button">
+          <button onClick={() => navigate("/")} className="button">
             Home
           </button>
         </div>
