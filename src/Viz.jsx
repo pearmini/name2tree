@@ -93,9 +93,9 @@ export function Viz({names}) {
           )}
           <div className="select-container">
             <select className="select" value={selectedLayout} onChange={(e) => setSelectedLayout(e.target.value)}>
+              <option value="swarm">Swarm</option>
               <option value="cloud">Cloud</option>
               <option value="grid">Grid</option>
-              <option value="swarm">Swarm</option>
             </select>
           </div>
         </div>
