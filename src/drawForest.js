@@ -278,7 +278,7 @@ export function forest(container, {styleWidth, styleHeight, names}) {
     const FIRST = "First Day\n2025-05-11";
     const SECOND = "Second Day\n2025-05-12";
 
-    const slicedNames = names.reverse().slice(7, names.length);
+    const slicedNames = [...names].reverse().slice(7, names.length);
     const data = slicedNames.map((d) => {
       const isFirstDay = new Date(d.createdAt) < new Date("2025-05-12");
       const firstDayStartTime = new Date("2025-05-11T18:00:00.000Z"); // New York Time 4pm
@@ -292,7 +292,7 @@ export function forest(container, {styleWidth, styleHeight, names}) {
     const min = d3.min(data, (d) => d.offset);
     data.forEach((d) => (d.offset = (d.offset - min) / 1000 / 60));
 
-    console.log(data);
+    const r = 25;
 
     const node = Plot.plot({
       height: styleHeight - 20,
@@ -312,7 +312,7 @@ export function forest(container, {styleWidth, styleHeight, names}) {
             title: "name",
             fill: "currentColor",
             fy: "day",
-            r: 25,
+            r,
           }),
         ),
         Plot.dotX(
@@ -322,12 +322,32 @@ export function forest(container, {styleWidth, styleHeight, names}) {
             title: "name",
             fill: "currentColor",
             fy: "day",
-            r: 25,
+            r,
             anchor: "top",
           }),
         ),
       ],
     });
+
+    d3.select(node)
+      .selectAll("circle")
+      .each(function (d) {
+        const circle = d3.select(this);
+        const title = circle.select("title");
+        const text = title.text();
+        const x = circle.attr("cx");
+        const y = circle.attr("cy");
+        const group = d3
+          .create("svg:g")
+          .attr("transform", `translate(${x - r}, ${y - r})`)
+          .node();
+        const treeNode = tree(text, {padding: 0, number: false, line: false, end: false, strokeWidth: 2}).render();
+        d3.select(treeNode).attr("transform", `scale(${(r * 2) / 480})`);
+        group.appendChild(treeNode);
+        circle.node().parentNode.appendChild(group);
+        circle.attr("fill", "transparent");
+        circle.attr("stroke", "black");
+      });
 
     div.appendChild(node);
   }

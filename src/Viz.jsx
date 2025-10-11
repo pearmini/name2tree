@@ -13,18 +13,18 @@ export function Viz({names}) {
   const description = useMemo(() => {
     if (selectedLayout === "cloud") {
       return {
-        title: "Tree Cloud: Placing trees along a spiral path",
-        description: "Pan and zoom. Click to zoom to a specific tree.",
+        title: "Tree Cloud: Natural Forest",
+        description: "Trees arranged organically, simulating a real forest. Pan, zoom, and click to explore.",
       };
     } else if (selectedLayout === "grid") {
       return {
-        title: "Tree Grid: Placing trees in a grid",
-        description: "Pan and zoom. Click to zoom to a specific tree.",
+        title: "Tree Grid: Structured Overview",
+        description: "Organized matrix view. Pan, zoom, and click to explore individual trees.",
       };
     } else if (selectedLayout === "swarm") {
       return {
-        title: "Tree Swarm: Placing trees along an the timeline",
-        description: "Explore when people added their trees in ITP Spring Show 2025.",
+        title: "Tree Swarm: Timeline View",
+        description: "Watch our forest grow chronologically throughout ITP Spring Show 2025.",
       };
     }
   }, [selectedLayout]);
