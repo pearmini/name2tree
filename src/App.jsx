@@ -13,9 +13,9 @@ import "./App.css";
 import {Routes, Route, useLocation, useNavigate, Link} from "react-router-dom";
 
 function initData() {
-  const localNames = localStorage.getItem("names");
-  const names = localNames && JSON.parse(localNames);
-  return names && names.length !== 0 ? names : data;
+  // const localNames = localStorage.getItem("names");
+  // const names = localNames && JSON.parse(localNames);
+  return data;
 }
 
 function uid() {
@@ -143,7 +143,7 @@ function App() {
               : {position: "fixed", right: "20px", top: "20px"}
           }
         >
-          <button onClick={() => navigate("/")} className="button primary-button">
+          <button onClick={() => navigate("/")} className="button">
             Home
           </button>
         </div>

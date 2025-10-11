@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import * as Plot from "@observablehq/plot";
 import {tree} from "./drawTree.js";
 import {BACKGROUND_COLOR} from "./constants.js";
 
@@ -192,10 +193,11 @@ export function forest(container, {styleWidth, styleHeight, names}) {
   }
 
   function wordCloud() {
-    cloud(cells);
-    randomize(cells);
-    scaleY(cells, styleWidth / styleHeight);
-    render({cells});
+    const copyCells = cells.map((d) => ({...d}));
+    cloud(copyCells);
+    randomize(copyCells);
+    scaleY(copyCells, styleWidth / styleHeight);
+    render({cells: copyCells});
   }
 
   function grid({sortBy}) {
@@ -258,8 +260,96 @@ export function forest(container, {styleWidth, styleHeight, names}) {
     timeout = setTimeout(() => {
       if (layout === "cloud") wordCloud();
       else if (layout === "grid") grid({sortBy});
+      else if (layout === "swarm") swarm();
       emit("end");
     }, 50);
+  }
+
+  function swarm() {
+    container.innerHTML = "";
+    const div = document.createElement("div");
+    div.style.width = "100%";
+    div.style.height = "100%";
+    div.style.display = "flex";
+    div.style.justifyContent = "center";
+    div.style.alignItems = "center";
+    container.appendChild(div);
+
+    const FIRST = "First Day\n2025-05-11";
+    const SECOND = "Second Day\n2025-05-12";
+
+    const slicedNames = [...names].reverse().slice(7, names.length);
+    const data = slicedNames.map((d) => {
+      const isFirstDay = new Date(d.createdAt) < new Date("2025-05-12");
+      const firstDayStartTime = new Date("2025-05-11T18:00:00.000Z"); // New York Time 4pm
+      const secondDayStartTime = new Date("2025-05-12T20:00:00.000Z"); // New York Time 6pm
+      return {
+        ...d,
+        day: isFirstDay ? FIRST : SECOND,
+        offset: isFirstDay ? new Date(d.createdAt) - firstDayStartTime : new Date(d.createdAt) - secondDayStartTime,
+      };
+    });
+    const min = d3.min(data, (d) => d.offset);
+    data.forEach((d) => (d.offset = (d.offset - min) / 1000 / 60));
+
+    const r = 25;
+
+    const node = Plot.plot({
+      height: styleHeight - 20,
+      width: styleWidth - 40,
+      marginLeft: 80,
+      marginRight: 50,
+      fy: {padding: 0},
+      x: {
+        label: "Time (minutes)",
+        grid: true,
+      },
+      marks: [
+        Plot.dotX(
+          data.filter((d) => d.day === FIRST),
+          Plot.dodgeY({
+            x: (d) => d.offset,
+            title: "name",
+            fill: "currentColor",
+            fy: "day",
+            r,
+          }),
+        ),
+        Plot.dotX(
+          data.filter((d) => d.day === SECOND),
+          Plot.dodgeY({
+            x: (d) => d.offset,
+            title: "name",
+            fill: "currentColor",
+            fy: "day",
+            r,
+            anchor: "top",
+          }),
+        ),
+      ],
+    });
+
+    d3.select(node)
+      .selectAll("circle")
+      .each(function (d) {
+        const circle = d3.select(this);
+        const title = circle.select("title");
+        const text = title.text();
+        const x = circle.attr("cx");
+        const y = circle.attr("cy");
+        const group = d3
+          .create("svg:g")
+          .attr("transform", `translate(${x - r}, ${y - r})`)
+          .node();
+        const treeNode = tree(text, {padding: 0, number: false, line: false, end: false, strokeWidth: 2}).render();
+        d3.select(treeNode).attr("transform", `scale(${(r * 2) / 480})`);
+        group.appendChild(treeNode);
+        circle.node().parentNode.appendChild(group);
+        circle.attr("fill", "transparent");
+        circle.attr("stroke", "black");
+      });
+
+    div.appendChild(node);
   }
 
   function on(event, callback) {

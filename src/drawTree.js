@@ -188,6 +188,7 @@ export function tree(
     line = true,
     end = true,
     plot = false,
+    strokeWidth = 1.5,
   } = {},
 ) {
   const width = 480;
@@ -366,7 +367,7 @@ export function tree(
           width: width,
           height: height,
           stroke,
-          strokeWidth: 1.5,
+          strokeWidth,
           fill: "transparent",
         }),
       cm.svg("g", flowers, {
@@ -375,10 +376,10 @@ export function tree(
           cm.svg("path", {
             d: `M0,0L0,${-initLen * 0.618}`,
             stroke: "black",
-            strokeWidth: 1.5,
+            strokeWidth,
           }),
           cm.svg("g", {
-            strokeWidth: 1.5,
+            strokeWidth,
             transform: `translate(0, ${-initLen * 0.618})`,
             children: [
               rose(12, 1, i + 2, {
@@ -392,7 +393,7 @@ export function tree(
       tree &&
         cm.svg("g", {
           stroke: "black",
-          strokeWidth: 1.5,
+          strokeWidth,
           children: [
             cm.svg("path", paths, {
               d: (d) => d.d,
@@ -408,7 +409,7 @@ export function tree(
               plot &&
                 cm.svg("path", {
                   d: hachureCirclePath(d.r),
-                  strokeWidth: 1.5,
+                  strokeWidth,
                   fill: "transparent",
                   stroke: "black",
                 }),
@@ -453,14 +454,14 @@ export function tree(
         cm.svg("path", {
           d: `M${padding},${baselineY}L${width - padding},${baselineY}`,
           stroke: "black",
-          strokeWidth: 1.5,
+          strokeWidth,
         }),
       number &&
         (plot
           ? cm.svg("g", {
               transform: "translate(448, 448)",
               stroke: "black",
-              strokeWidth: 1.5,
+              strokeWidth,
               fill: "transparent",
               children: [pathNumber(ellipsis(ascii, 40))],
             })
