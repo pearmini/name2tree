@@ -9,6 +9,7 @@ export function Viz({names}) {
   const [selectedLayout, setSelectedLayout] = useState("swarm");
   const [sortBy, setSortBy] = useState("time-asc");
   const headerHeight = 68;
+  const [horizontal, setHorizontal] = useState(true);
 
   const description = useMemo(() => {
     if (selectedLayout === "cloud") {
@@ -51,7 +52,7 @@ export function Viz({names}) {
 
   useEffect(() => {
     if (layoutRef.current) {
-      layoutRef.current.update({layout: selectedLayout, sortBy});
+      layoutRef.current.update({layout: selectedLayout, sortBy, horizontal});
     }
   }, [selectedLayout]);
 
@@ -60,6 +61,12 @@ export function Viz({names}) {
       layoutRef.current.update({layout: selectedLayout, sortBy});
     }
   }, [sortBy]);
+
+  useEffect(() => {
+    if (layoutRef.current) {
+      layoutRef.current.update({layout: selectedLayout, horizontal});
+    }
+  }, [horizontal]);
 
   return (
     <div style={{width: "100vw", height: "100vh", background: BACKGROUND_COLOR, overflow: "hidden"}}>
@@ -88,6 +95,18 @@ export function Viz({names}) {
                 <option value="name-desc">Sort by Name (Desc)</option>
                 <option value="number-asc">Sort by Digits (Asc)</option>
                 <option value="number-desc">Sort by Digits (Desc)</option>
+              </select>
+            </div>
+          )}
+          {selectedLayout === "swarm" && (
+            <div className="select-container">
+              <select
+                className="select"
+                value={horizontal ? "horizontal" : "vertical"}
+                onChange={(e) => setHorizontal(e.target.value === "horizontal")}
+              >
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
               </select>
             </div>
           )}
