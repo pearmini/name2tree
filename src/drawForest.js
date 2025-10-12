@@ -305,6 +305,12 @@ export function forest(container, {styleWidth, styleHeight, names}) {
         grid: true,
       },
       marks: [
+        Plot.frame({
+          fy: FIRST,
+          stroke: "currentColor",
+          anchor: "bottom",
+          // strokeOpacity: 0.1,
+        }),
         Plot.dotX(
           data.filter((d) => d.day === FIRST),
           Plot.dodgeY({
