@@ -254,22 +254,22 @@ export function forest(container, {styleWidth, styleHeight, names}) {
     render({line: true, cells: sortedCells});
   }
 
-  function update({layout, sortBy}) {
+  function update({layout, sortBy, horizontal}) {
     emit("start");
     clearTimeout(timeout);
     timeout = setTimeout(() => {
       if (layout === "cloud") wordCloud();
       else if (layout === "grid") grid({sortBy});
-      else if (layout === "swarm") swarm();
+      else if (layout === "swarm") swarm({horizontal});
       emit("end");
     }, 50);
   }
 
-  function swarm() {
+  function swarm({horizontal = true} = {}) {
     container.innerHTML = "";
     const div = document.createElement("div");
     div.style.width = "100%";
-    div.style.height = "100%";
+    div.style.height = "calc(100vh - 68px)";
     div.style.display = "flex";
     div.style.justifyContent = "center";
     div.style.alignItems = "center";
@@ -294,46 +294,90 @@ export function forest(container, {styleWidth, styleHeight, names}) {
 
     const r = 25;
 
-    const node = Plot.plot({
-      height: styleHeight - 20,
-      width: styleWidth - 40,
-      marginLeft: 80,
-      marginRight: 50,
-      fy: {padding: 0},
-      x: {
-        label: "Time (minutes)",
-        grid: true,
-      },
-      marks: [
-        Plot.frame({
-          fy: FIRST,
-          stroke: "currentColor",
-          anchor: "bottom",
-          // strokeOpacity: 0.1,
-        }),
-        Plot.dotX(
-          data.filter((d) => d.day === FIRST),
-          Plot.dodgeY({
-            x: (d) => d.offset,
-            title: "name",
-            fill: "currentColor",
-            fy: "day",
-            r,
+    let node;
+
+    if (horizontal) {
+      node = Plot.plot({
+        height: styleHeight - 20,
+        width: styleWidth - 40,
+        marginLeft: 80,
+        marginRight: 50,
+        fy: {padding: 0},
+        x: {
+          label: "Time (minutes)",
+          grid: true,
+        },
+        marks: [
+          Plot.frame({
+            fy: FIRST,
+            stroke: "currentColor",
+            anchor: "bottom",
           }),
-        ),
-        Plot.dotX(
-          data.filter((d) => d.day === SECOND),
-          Plot.dodgeY({
-            x: (d) => d.offset,
-            title: "name",
-            fill: "currentColor",
-            fy: "day",
-            r,
-            anchor: "top",
+          Plot.dotX(
+            data.filter((d) => d.day === FIRST),
+            Plot.dodgeY({
+              x: (d) => d.offset,
+              title: "name",
+              fill: "currentColor",
+              fy: "day",
+              r,
+            }),
+          ),
+          Plot.dotX(
+            data.filter((d) => d.day === SECOND),
+            Plot.dodgeY({
+              x: (d) => d.offset,
+              title: "name",
+              fill: "currentColor",
+              fy: "day",
+              r,
+              anchor: "top",
+            }),
+          ),
+        ],
+      });
+    } else {
+      node = Plot.plot({
+        height: styleHeight - 20,
+        width: styleWidth - 40,
+        marginTop: 30,
+        marginBottom: 50,
+        fx: {padding: 0},
+        y: {
+          label: "Time (minutes)",
+          grid: true,
+          reverse: true,
+        },
+        marks: [
+          Plot.frame({
+            fx: FIRST,
+            stroke: "currentColor",
+            anchor: "right",
           }),
-        ),
-      ],
-    });
+          Plot.dotY(
+            data.filter((d) => d.day === FIRST),
+            Plot.dodgeX({
+              y: (d) => d.offset,
+              title: "name",
+              fill: "currentColor",
+              fx: "day",
+              r,
+              anchor: "right",
+            }),
+          ),
+          Plot.dotY(
+            data.filter((d) => d.day === SECOND),
+            Plot.dodgeX({
+              y: (d) => d.offset,
+              title: "name",
+              fill: "currentColor",
+              fx: "day",
+              r,
+            }),
+          ),
+        ],
+      });
+    }
 
     d3.select(node)
       .selectAll("circle")
