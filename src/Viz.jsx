@@ -63,6 +63,7 @@ export function Viz({names}) {
   }, [sortBy]);
 
   useEffect(() => {
+    console.log("horizontal", horizontal);
     if (layoutRef.current) {
       layoutRef.current.update({layout: selectedLayout, horizontal});
     }
@@ -102,7 +103,7 @@ export function Viz({names}) {
             <div className="select-container">
               <select
                 className="select"
-                value={horizontal}
+                value={horizontal ? "horizontal" : "vertical"}
                 onChange={(e) => setHorizontal(e.target.value === "horizontal")}
               >
                 <option value="horizontal">Horizontal</option>
