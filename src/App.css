@@ -14,6 +14,15 @@
   transform: translateY(50%);
 }
 
+/* Viz page default (desktop) styles */
+.viz-mobile-fallback {
+  display: none;
+}
+
+.viz-desktop {
+  display: block;
+}
+
 @media (max-width: 768px) {
   .menu-container {
     top: 50px;
@@ -61,5 +70,17 @@
 
   .home-button-container .button {
     background-color: #fefaf1;
+  }
+
+  .viz-mobile-fallback {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .viz-desktop {
+    display: none !important;
   }
 }
