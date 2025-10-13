@@ -380,23 +380,126 @@ export function forest(container, {styleWidth, styleHeight, names}) {
     }
 
     d3.select(node)
-      .selectAll("circle")
+      .selectAll("g[aria-label='dot']")
       .each(function (d) {
-        const circle = d3.select(this);
-        const title = circle.select("title");
-        const text = title.text();
-        const x = circle.attr("cx");
-        const y = circle.attr("cy");
-        const group = d3
-          .create("svg:g")
-          .attr("transform", `translate(${x - r}, ${y - r})`)
-          .node();
-        const treeNode = tree(text, {padding: 0, number: false, line: false, end: false, strokeWidth: 2}).render();
-        d3.select(treeNode).attr("transform", `scale(${(r * 2) / 480})`);
-        group.appendChild(treeNode);
-        circle.node().parentNode.appendChild(group);
-        circle.attr("fill", "transparent");
-        circle.attr("stroke", "black");
+        const namesWithPosition = [];
+
+        d3.select(this)
+          .selectAll("circle")
+          .each(function (d) {
+            const circle = d3.select(this);
+            const title = circle.select("title");
+            const text = title.text();
+            const x = circle.attr("cx");
+            const y = circle.attr("cy");
+            const group = d3
+              .create("svg:g")
+              .attr("transform", `translate(${x - r}, ${y - r})`)
+              .node();
+            const treeNode = tree(text, {padding: 0, number: false, line: false, end: false, strokeWidth: 2}).render();
+            d3.select(treeNode).attr("transform", `scale(${(r * 2) / 480})`);
+            group.appendChild(treeNode);
+            circle.node().parentNode.appendChild(group);
+            circle.attr("fill", BACKGROUND_COLOR);
+            circle.attr("stroke", "black");
+            namesWithPosition.push({text, x: +x, y: +y, r: +r, connected: false, parent: null});
+          });
+
+        const toAdd = new Set(namesWithPosition);
+        const branches = [];
+        let currentBranch = null;
+        while (toAdd.size > 0) {
+          if (!currentBranch) {
+            const nextNode = toAdd.values().next().value;
+            currentBranch = [nextNode];
+            toAdd.delete(nextNode);
+          }
+          let added = false;
+          for (const node of toAdd) {
+            // Add the node to the current branch if it is near any node in the current branch
+            for (const currentNode of currentBranch) {
+              if (isNear(node, currentNode)) {
+                // If the node is already connected, skip it to start a new branch,
+                // but add it to its parent.
+                if (currentNode.connected) {
+                  node.parent = currentNode;
+                  continue;
+                }
+                currentNode.connected = true;
+                currentBranch.push(node);
+                toAdd.delete(node);
+                added = true;
+                break;
+              }
+            }
+          }
+          if (!added) {
+            branches.push(currentBranch);
+            currentBranch = null;
+          }
+        }
+        if (currentBranch) branches.push(currentBranch);
+
+        // Append the parent to the node if it exists.
+        for (let i = 0; i < branches.length; i++) {
+          const nodes = branches[i];
+          branches[i] = nodes.flatMap((d) => (d.parent ? [d.parent, d] : [d]));
+          for (const node of nodes) {
+            if (horizontal) {
+              node.ty = node.y;
+              node.tx = node.x + node.r;
+            } else {
+              node.ty = node.y + node.r;
+              node.tx = node.x;
+            }
+          }
+        }
+
+        function isNear(nodeA, nodeB) {
+          const dist = Math.sqrt((nodeA.x - nodeB.x) ** 2 + (nodeA.y - nodeB.y) ** 2);
+          return dist <= nodeA.r + nodeB.r + 1 + 0.1;
+        }
+
+        // This make the lines too obvious, so I don't use it, but it's still a good try.
+        // for (let i = 0; i < branches.length; i++) {
+        //   const nodes = branches[i];
+        //   for (let j = 1; j < nodes.length; j++) {
+        //     const prevNode = nodes[j - 1];
+        //     const node = nodes[j];
+        //     const [a, b] = computeTangents(prevNode, node);
+        //     if (!prevNode.tx) prevNode.tx = a.x;
+        //     if (!prevNode.ty) prevNode.ty = a.y;
+        //     if (!node.tx && j === nodes.length - 1) node.tx = b.x;
+        //     if (!node.ty && j === nodes.length - 1) node.ty = b.y;
+        //   }
+        // }
+
+        // function computeTangents(a, b) {
+        //   const angleA = Math.atan2(b.y - a.y, b.x - a.x);
+        //   const angle = Math.PI / 2 - angleA;
+        //   const a1 = {x: a.x + Math.cos(angle) * a.r, y: a.y - Math.sin(angle) * a.r};
+        //   const b1 = {x: b.x + Math.cos(angle) * b.r, y: b.y - Math.sin(angle) * b.r};
+        //   return [a1, b1];
+        // }
+
+        const g = d3.create("svg:g");
+
+        const line = d3
+          .line()
+          .curve(d3.curveCatmullRom)
+          .x((d) => d.tx)
+          .y((d) => d.ty);
+
+        g.selectAll("path")
+          .data(branches)
+          .join("path")
+          .attr("d", line)
+          .attr("stroke", "black")
+          .attr("fill", "transparent");
+
+        const plotArea = d3.select(this).select("g").node();
+
+        plotArea.insertBefore(g.node(), plotArea.firstChild);
       });
 
     div.appendChild(node);
