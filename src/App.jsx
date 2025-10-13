@@ -39,7 +39,7 @@ function App() {
 
   // Show menu only on tree page
   const showMenu = location.pathname === "/";
-  const showBack = !isMobile && location.pathname !== "/";
+  const showBack = location.pathname !== "/";
   const showBackMiddle = location.pathname !== "/viz";
 
   function onAdd(text) {
@@ -120,6 +120,7 @@ function App() {
       )}
       {showBack && (
         <div
+          className="home-button-container"
           style={
             showBackMiddle
               ? {
