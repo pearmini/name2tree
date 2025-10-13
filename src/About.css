@@ -46,7 +46,7 @@
 /* Mobile styles */
 @media (max-width: 768px) {
   .about-container {
-    padding: 20px;
+    padding: 80px 20px 20px 20px;
     overflow-y: auto;
   }
 

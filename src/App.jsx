@@ -119,23 +119,25 @@ function App() {
         </div>
       )}
       {showBack && (
-        <div
-          className="home-button-container"
-          style={
-            showBackMiddle
-              ? {
-                  position: "fixed",
-                  right: "20px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                }
-              : {position: "fixed", right: "20px", top: "20px"}
-          }
-        >
-          <button onClick={() => navigate("/")} className="button">
-            Home
-          </button>
-        </div>
+        <header className="home-header">
+          <div
+            className="home-button-container"
+            style={
+              showBackMiddle
+                ? {
+                    position: "fixed",
+                    right: "20px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }
+                : {position: "fixed", right: "20px", top: "20px"}
+            }
+          >
+            <button onClick={() => navigate("/")} className="button">
+              Home
+            </button>
+          </div>
+        </header>
       )}
     </div>
   );
