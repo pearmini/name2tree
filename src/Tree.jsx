@@ -103,7 +103,12 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   useEffect(() => {
     if (showDownloadModal && modalTreeRef.current) {
       modalTreeRef.current.innerHTML = "";
-      const svg = tree(text, {grid: false, number: modalShowNumbers, stamp: modalShowSignature, plot: modalShowPlotter}).render();
+      const svg = tree(text, {
+        grid: false,
+        number: modalShowNumbers,
+        stamp: modalShowSignature,
+        plot: modalShowPlotter,
+      }).render();
       svg.style.width = "100%";
       svg.style.height = "100%";
       svg.setAttribute("viewBox", "0 0 480 480");
@@ -114,7 +119,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
   // Helper to generate filename with timestamp
   function getDownloadFilename(base) {
     const now = new Date();
-    const pad = (n) => n.toString().padStart(2, '0');
+    const pad = (n) => n.toString().padStart(2, "0");
     const y = now.getFullYear();
     const m = pad(now.getMonth() + 1);
     const d = pad(now.getDate());
@@ -135,6 +140,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
       }}
     >
       <div
+        className="input-container"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -143,6 +149,7 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
       >
         <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
           <input
+            id="input"
             ref={inputRef}
             className="input"
             placeholder={PLACEHOLDER}
@@ -200,7 +207,15 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
           />
         </div>
       </div>
-      <div style={{display: "flex", gap: "10px", marginTop: "20px", visibility: text ? "visible" : "hidden"}}>
+      <div
+        className="action-buttons"
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "20px",
+          visibility: text ? "visible" : "hidden",
+        }}
+      >
         {isAdmin ? (
           <>
             <button
@@ -252,15 +267,6 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
             <button className="button" style={{fontSize: "14px"}} onClick={() => setShowDownloadModal(true)}>
               Download
             </button>
-            {isMobile ? (
-              <button
-                className="button"
-                style={{fontSize: "14px"}}
-                onClick={() => window.open("https://github.com/pearmini/string2tree", "_blank")}
-              >
-                Github
-              </button>
-            ) : null}
           </>
         )}
       </div>
@@ -363,7 +369,6 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
           </div>
         </div>
       )}
-      {isMobile && <p style={{marginTop: "24px", fontSize: "14px"}}>Open in PC or Pad for more features.</p>}
       <p
         style={{
           visibility: tooltip ? "visible" : "hidden",

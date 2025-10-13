@@ -70,77 +70,88 @@ export function Viz({names}) {
 
   return (
     <div style={{width: "100vw", height: "100vh", background: BACKGROUND_COLOR, overflow: "hidden"}}>
-      <div
-        style={{
-          height: headerHeight,
-          borderBottom: "1px solid #ccc",
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          padding: "0 20px",
-          paddingRight: 100,
-        }}
-      >
-        <div style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
-          <h2 style={{marginBottom: 4}}>{description.title}</h2>
-          <p>{description.description}</p>
-        </div>
-        <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 20}}>
-          {selectedLayout === "grid" && (
+      {/* Mobile fallback image */}
+      <div className="viz-mobile-fallback">
+        <img
+          src="/tree.png"
+          alt="Tree visualization"
+          style={{width: "100vw", marginTop: "20px", marginBottom: "40px"}}
+        />
+      </div>
+      {/* Desktop visualization */}
+      <div className="viz-desktop">
+        <div
+          style={{
+            height: headerHeight,
+            borderBottom: "1px solid #ccc",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            padding: "0 20px",
+            paddingRight: 100,
+          }}
+        >
+          <div style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
+            <h2 style={{marginBottom: 4}}>{description.title}</h2>
+            <p>{description.description}</p>
+          </div>
+          <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 20}}>
+            {selectedLayout === "grid" && (
+              <div className="select-container">
+                <select className="select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="time-asc">Sort by Time (Asc)</option>
+                  <option value="time-desc">Sort by Time (Desc)</option>
+                  <option value="name-asc">Sort by Name (Asc)</option>
+                  <option value="name-desc">Sort by Name (Desc)</option>
+                  <option value="number-asc">Sort by Digits (Asc)</option>
+                  <option value="number-desc">Sort by Digits (Desc)</option>
+                </select>
+              </div>
+            )}
+            {selectedLayout === "swarm" && (
+              <div className="select-container">
+                <select
+                  className="select"
+                  value={horizontal ? "horizontal" : "vertical"}
+                  onChange={(e) => setHorizontal(e.target.value === "horizontal")}
+                >
+                  <option value="horizontal">Horizontal</option>
+                  <option value="vertical">Vertical</option>
+                </select>
+              </div>
+            )}
             <div className="select-container">
-              <select className="select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="time-asc">Sort by Time (Asc)</option>
-                <option value="time-desc">Sort by Time (Desc)</option>
-                <option value="name-asc">Sort by Name (Asc)</option>
-                <option value="name-desc">Sort by Name (Desc)</option>
-                <option value="number-asc">Sort by Digits (Asc)</option>
-                <option value="number-desc">Sort by Digits (Desc)</option>
+              <select className="select" value={selectedLayout} onChange={(e) => setSelectedLayout(e.target.value)}>
+                <option value="swarm">Swarm</option>
+                <option value="cloud">Cloud</option>
+                <option value="grid">Grid</option>
               </select>
             </div>
-          )}
-          {selectedLayout === "swarm" && (
-            <div className="select-container">
-              <select
-                className="select"
-                value={horizontal ? "horizontal" : "vertical"}
-                onChange={(e) => setHorizontal(e.target.value === "horizontal")}
-              >
-                <option value="horizontal">Horizontal</option>
-                <option value="vertical">Vertical</option>
-              </select>
-            </div>
-          )}
-          <div className="select-container">
-            <select className="select" value={selectedLayout} onChange={(e) => setSelectedLayout(e.target.value)}>
-              <option value="swarm">Swarm</option>
-              <option value="cloud">Cloud</option>
-              <option value="grid">Grid</option>
-            </select>
           </div>
         </div>
-      </div>
-      <div>
-        {loading && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-            }}
-          >
+        <div>
+          {loading && (
             <div
               style={{
-                transform: "translate(-50%, -50%)",
-                background: BACKGROUND_COLOR,
-                padding: 10,
-                border: "1px solid black",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
               }}
             >
-              Rendering...
+              <div
+                style={{
+                  transform: "translate(-50%, -50%)",
+                  background: BACKGROUND_COLOR,
+                  padding: 10,
+                  border: "1px solid black",
+                }}
+              >
+                Rendering...
+              </div>
             </div>
-          </div>
-        )}
-        <div ref={forestRef}></div>
+          )}
+          <div ref={forestRef}></div>
+        </div>
       </div>
     </div>
   );

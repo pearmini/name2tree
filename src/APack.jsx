@@ -2,7 +2,7 @@ import * as apack from "apackjs";
 import {useEffect, useRef} from "react";
 import {BACKGROUND_COLOR} from "./constants.js";
 
-export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave, style={}}) {
+export function APack({text, cellSize, onClick, onMouseEnter, onMouseLeave, style = {}}) {
   const ref = useRef(null);
 
   useEffect(() => {

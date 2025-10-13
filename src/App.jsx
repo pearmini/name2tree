@@ -38,8 +38,8 @@ function App() {
   const navigate = useNavigate();
 
   // Show menu only on tree page
-  const showMenu = !isMobile && location.pathname === "/";
-  const showBack = !isMobile && location.pathname !== "/";
+  const showMenu = location.pathname === "/";
+  const showBack = location.pathname !== "/";
   const showBackMiddle = location.pathname !== "/viz";
 
   function onAdd(text) {
@@ -91,19 +91,7 @@ function App() {
         <Route path="/viz" element={<Viz names={names} />} />
       </Routes>
       {showMenu && (
-        <div
-          style={{
-            position: "fixed",
-            right: "20px",
-            borderRadius: "10px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "10px",
-            bottom: "50%",
-            transform: "translateY(50%)",
-          }}
-        >
+        <div className="menu-container">
           <Link to="/forest" style={{textDecoration: "none"}}>
             <APack text="Forest" cellSize={50} />
           </Link>
@@ -131,22 +119,25 @@ function App() {
         </div>
       )}
       {showBack && (
-        <div
-          style={
-            showBackMiddle
-              ? {
-                  position: "fixed",
-                  right: "20px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                }
-              : {position: "fixed", right: "20px", top: "20px"}
-          }
-        >
-          <button onClick={() => navigate("/")} className="button">
-            Home
-          </button>
-        </div>
+        <header className="home-header">
+          <div
+            className="home-button-container"
+            style={
+              showBackMiddle
+                ? {
+                    position: "fixed",
+                    right: "20px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }
+                : {position: "fixed", right: "20px", top: "20px"}
+            }
+          >
+            <button onClick={() => navigate("/")} className="button">
+              Home
+            </button>
+          </div>
+        </header>
       )}
     </div>
   );
