@@ -87,7 +87,7 @@ function App() {
           }
         />
         <Route path="/write" element={<Writing isAdmin={isAdmin} />} />
-        <Route path="/about" element={<About isAdmin={isAdmin} />} />
+        <Route path="/about" element={<About isAdmin={isAdmin} isMobile={isMobile} />} />
         <Route path="/viz" element={<Viz names={names} />} />
       </Routes>
       {showMenu && (

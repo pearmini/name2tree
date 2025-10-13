@@ -42,3 +42,20 @@
   flex: 1;
   overflow: hidden;
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .features-flex {
+    gap: 15px;
+  }
+
+  .feature-row {
+    flex-direction: column;
+    height: auto;
+  }
+}
