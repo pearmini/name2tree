@@ -171,6 +171,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
         `}
       </style>
       <div
+        className="forest-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",

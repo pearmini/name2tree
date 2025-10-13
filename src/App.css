@@ -31,4 +31,9 @@
   .input-container {
     margin-top: 150px;
   }
+
+  .forest-grid {
+    grid-template-columns: 1fr !important;
+    padding: 0px 20px 20px 20px !important;
+  }
 }
