@@ -9,7 +9,7 @@ export function Viz({names}) {
   const [selectedLayout, setSelectedLayout] = useState("swarm");
   const [sortBy, setSortBy] = useState("time-asc");
   const headerHeight = 68;
-  const [horizontal, setHorizontal] = useState(true);
+  const [horizontal, setHorizontal] = useState(false);
 
   const description = useMemo(() => {
     if (selectedLayout === "cloud") {
