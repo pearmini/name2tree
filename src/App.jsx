@@ -92,6 +92,14 @@ function App() {
       </Routes>
       {showMenu && (
         <div className="menu-container">
+          <a
+            href="https://landscape.bairui.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{textDecoration: "none"}}
+          >
+            <APack text="Landscape" cellSize={50} />
+          </a>
           <Link to="/forest" style={{textDecoration: "none"}}>
             <APack text="Forest" cellSize={50} />
           </Link>
