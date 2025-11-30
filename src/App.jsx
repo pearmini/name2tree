@@ -106,6 +106,14 @@ function App() {
           <Link to="/viz" style={{textDecoration: "none"}}>
             <APack text="Viz" cellSize={50} />
           </Link>
+          <a
+            href="https://music.bairui.dev/tree"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{textDecoration: "none"}}
+          >
+            <APack text="Harmony" cellSize={50} />
+          </a>
           {isAdmin && (
             <Link to="/write" style={{textDecoration: "none"}}>
               <APack text="Write" cellSize={50} />
