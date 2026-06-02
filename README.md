@@ -12,6 +12,8 @@ These are trees generated from different text inputs. Notice that the input is n
 | --- | --- | --- |
 | ![Example tree 4](./img/readme-tree4.webp) | ![Example tree 5](./img/readme-tree5.webp) | ![Example tree 6](./img/readme-tree6.webp) |
 
+![Tree cloud visualization](./img/readme-cloud.png)
+
 ## Links
 
 - Live app: [tree.bairui.dev](https://tree.bairui.dev/)
@@ -139,3 +141,5 @@ Some inputs create awkward structures, such as a single long branch or a very ta
 Find Trees in Names was shown at ITP Spring Show 2025 as a collective generative art installation. Participants could create a tree, add it to the shared forest, download it with a QR code, and print it for the wall. The project explores digital identity, authorship, and the natural dimension of code by connecting a simple algorithm to something personal: a name.
 
 The work later expanded into Tree Swarm, Tree Cloud, Tree Harmony, and the procedural landscape [{Mountains, Trees, Names}*](https://landscape.bairui.dev/).
+
+![Procedural landscape made from Name2Tree trees](./img/readme-landscape.webp)
