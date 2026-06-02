@@ -1,12 +1,20 @@
 import {useEffect, useRef, useState, useMemo} from "react";
+import {useSearchParams} from "react-router-dom";
 import {forest} from "./drawForest.js";
 import {BACKGROUND_COLOR} from "./constants.js";
+
+const VALID_LAYOUTS = new Set(["swarm", "cloud", "grid"]);
+
+function getLayoutFromType(type) {
+  return VALID_LAYOUTS.has(type) ? type : "swarm";
+}
 
 export function Viz({names}) {
   const [loading, setLoading] = useState(false);
   const forestRef = useRef(null);
   const layoutRef = useRef(null);
-  const [selectedLayout, setSelectedLayout] = useState("swarm");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedLayout = getLayoutFromType(searchParams.get("type"));
   const [sortBy, setSortBy] = useState("time-asc");
   const headerHeight = 68;
   const [horizontal, setHorizontal] = useState(false);
@@ -22,13 +30,28 @@ export function Viz({names}) {
         title: "A Grid of Trees",
         description: "A grid displaying trees from ITP Spring Show 2025 in a structured overview.",
       };
-    } else if (selectedLayout === "swarm") {
-      return {
-        title: "A Tree of Trees",
-        description: "A beeswarm chart displaying trees from ITP Spring Show 2025 along a timeline.",
-      };
     }
+
+    return {
+      title: "A Tree of Trees",
+      description: "A beeswarm chart displaying trees from ITP Spring Show 2025 along a timeline.",
+    };
   }, [selectedLayout]);
+
+  useEffect(() => {
+    if (!searchParams.get("type")) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set("type", "swarm");
+      setSearchParams(nextParams, {replace: true});
+    }
+  }, [searchParams, setSearchParams]);
+
+  function onLayoutChange(nextLayout) {
+    const layout = getLayoutFromType(nextLayout);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("type", layout);
+    setSearchParams(nextParams, {replace: true});
+  }
 
   useEffect(() => {
     if (forestRef.current) {
@@ -121,7 +144,7 @@ export function Viz({names}) {
               </div>
             )}
             <div className="select-container">
-              <select className="select" value={selectedLayout} onChange={(e) => setSelectedLayout(e.target.value)}>
+              <select className="select" value={selectedLayout} onChange={(e) => onLayoutChange(e.target.value)}>
                 <option value="swarm">Swarm</option>
                 <option value="cloud">Cloud</option>
                 <option value="grid">Grid</option>
