@@ -1,16 +1,8 @@
 # Name2Tree
 
-Name2Tree is a generative art app that turns text into deterministic tree drawings. It was built for the ITP Spring Show 2025 project [Find Trees in Names: What if We are Trees?](https://bairui.dev/name2tree), where visitors typed a name, watched a tree grow, added it to a shared forest, downloaded it through a QR flow, and printed it as a physical keepsake.
+Name2Tree is a generative art app that turns text into deterministic tree drawings. It began as the ITP Spring Show 2025 project [Find Trees in Names: What if We are Trees?](https://bairui.dev/name2tree), where visitors typed a name, watched a tree grow, added it to a shared forest, downloaded it through a QR flow, and printed it as a physical keepsake. The project explores digital identity, authorship, and the natural dimension of code by connecting a simple algorithm to something personal: a name.
 
 ![Find Trees in Names](./img/readme-main.webp)
-
-## Examples
-
-These are trees generated from different text inputs. Notice that the input is not limited to names; any text can be converted into a tree, including Chinese poems and numbers.
-
-| ![Example tree 1](./img/readme-tree1.webp) | ![Example tree 2](./img/readme-tree2.webp) | ![Example tree 3](./img/readme-tree3.webp) |
-| --- | --- | --- |
-| ![Example tree 4](./img/readme-tree4.webp) | ![Example tree 5](./img/readme-tree5.webp) | ![Example tree 6](./img/readme-tree6.webp) |
 
 ## Links
 
@@ -20,17 +12,45 @@ These are trees generated from different text inputs. Notice that the input is n
 - Related sound sketch: [Tree Harmony](https://music.bairui.dev/tree)
 - APack: [apack.bairui.dev](https://apack.bairui.dev/)
 
+## Why Is It
+
+Chinese characters often carry semantic cues beyond their phonetic value. In Bairui Su's Chinese name, the first character of the last name, `柏`, means cypress tree. This project starts from that personal connection and asks what trees might be hidden in other names.
+
+Name2Tree treats names and short text as both identity and data. By turning text into natural forms, it makes the relationship between code, language, and authorship visible, then extends the result into a shared forest, visualizations, sound, and landscape.
+
 ## What It Does
 
-- Converts a name or any short text into character-code digits.
-- Builds a tree where digit values determine each node's child count.
+- Converts a name or any short text into ASCII/Unicode code digits.
+- Builds a tree breadth-first, where each digit becomes the number of children for the current node.
 - Uses a deterministic seeded generator, so the same input always creates the same tree.
-- Balances branch angles by each branch's leaf count to reduce overlap.
-- Converts degenerate digit runs into flower/rose forms so edge cases still look intentional.
+- Balances branch angles by each branch's leaf count to reduce overlap and make the tree feel natural.
+- Converts degenerate digit runs, such as leading `1`s or trailing `0`s, into flower-like mathematical roses so edge cases still look intentional.
 - Adds an APack stamp-style signature that writes English text in a Chinese-character-like grid.
 - Supports saving, downloading, QR-code retrieval, and collective forest visualizations.
 
 ![Name2Tree conversion process](./img/readme-steps.webp)
+
+## Examples
+
+These are trees generated from different text inputs. Notice that the input is not limited to names; any text can be converted into a tree, including Chinese poems and numbers.
+
+| ![Example tree 1](./img/readme-tree1.webp) | ![Example tree 2](./img/readme-tree2.webp) | ![Example tree 3](./img/readme-tree3.webp) |
+| --- | --- | --- |
+| ![Example tree 4](./img/readme-tree4.webp) | ![Example tree 5](./img/readme-tree5.webp) | ![Example tree 6](./img/readme-tree6.webp) |
+
+## Visualizations
+
+The `/viz` route includes three ways to explore the collected trees from the installation:
+
+- Swarm: a beeswarm-like timeline for exploring submitted trees temporally.
+- Cloud: an organic packed layout for seeing the forest as a collective texture.
+- Grid: a sortable overview by time, name, or digit-derived score.
+
+![Tree swarm visualization](./img/readme-swarm.webp)
+
+The work also expands into Tree Harmony and the procedural landscape [{Mountains, Trees, Names}*](https://landscape.bairui.dev/).
+
+![Procedural landscape made from Name2Tree trees](./img/readme-landscape.webp)
 
 ## App Routes
 
@@ -43,15 +63,7 @@ These are trees generated from different text inputs. Notice that the input is n
 | `/about` | Project background and explanation. |
 | `/?text=...` | Download page for a specific tree, used by the QR-code flow. |
 
-## Visualizations
-
-The `/viz` route includes three ways to explore the collected trees from the installation:
-
-- Swarm: a beeswarm-like timeline for exploring submitted trees temporally.
-- Cloud: an organic packed layout for seeing the forest as a collective texture.
-- Grid: a sortable overview by time, name, or digit-derived score.
-
-![Tree swarm visualization](./img/readme-swarm.webp)
+Admin mode is available by appending `?admin=true` to the app URL. In admin mode, the forest view supports shortcuts for saving, downloading, clearing, removing, and uploading `names.json` data.
 
 ## Tech Stack
 
@@ -116,26 +128,6 @@ src/
   names.json       Seed archive data for the forest
 ```
 
-## Admin Mode
+## License
 
-Append `?admin=true` to the app URL to expose installation/admin controls. In admin mode, the forest view supports keyboard shortcuts:
-
-| Shortcut | Action |
-| --- | --- |
-| `s` | Save the current forest to local storage. |
-| `d` | Download the current forest as `names.json`. |
-| `c` | Clear local storage. |
-| `z` | Remove the selected tree. |
-| `u` | Upload a `names.json` file. |
-
-## Algorithm Notes
-
-The generator starts by converting text into ASCII/Unicode code digits. Those digits are interpreted breadth-first as a tree: each digit becomes the number of children for the current node. To make trees feel natural, branch angles are assigned proportionally to leaf counts instead of being split evenly.
-
-Some inputs create awkward structures, such as a single long branch or a very tall tree. Name2Tree detects digit segments made from leading `1`s or trailing `0`s, separates them from the main tree, and draws them as mathematical roses. This keeps the output balanced while preserving the deterministic relationship between text and drawing.
-
-## Exhibition Context
-
-Find Trees in Names was shown at ITP Spring Show 2025 as a collective generative art installation. Participants could create a tree, add it to the shared forest, download it with a QR code, and print it for the wall. The project explores digital identity, authorship, and the natural dimension of code by connecting a simple algorithm to something personal: a name.
-
-The work later expanded into Tree Swarm, Tree Cloud, Tree Harmony, and the procedural landscape [{Mountains, Trees, Names}*](https://landscape.bairui.dev/).
+MIT
