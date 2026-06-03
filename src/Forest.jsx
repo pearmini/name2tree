@@ -71,10 +71,13 @@ function TreeModal({name, onClose, isAdmin}) {
 
 export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedIndex}) {
   const [selectedId, setSelectedId] = useState(null);
-  const selectedName = names.find((name) => name.id === selectedId);
+  const selectedName =
+    typeof selectedId === "number"
+      ? names[selectedId]
+      : names.find((name) => name.id === selectedId);
 
-  function onClickTree(id) {
-    setSelectedId(id);
+  function onClickTree(id, index) {
+    setSelectedId(id ?? index);
   }
 
   const onSaveToLocalStorage = (names) => {
@@ -84,7 +87,12 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
 
   const onRemoveName = () => {
     if (confirm("Are you sure you want to remove this tree?")) {
-      const index = selectedId !== null ? names.findIndex((name) => name.id === selectedId) : 0;
+      const index =
+        typeof selectedId === "number"
+          ? selectedId
+          : selectedId !== null
+            ? names.findIndex((name) => name.id === selectedId)
+            : 0;
       const newNames = [...names];
       newNames.splice(index, 1);
       setNames(newNames);
@@ -186,7 +194,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
           <TreeItem
             key={name.id || name.name || index}
             name={name.name}
-            onClick={() => onClickTree(name.id)}
+            onClick={() => onClickTree(name.id, index)}
             options={{padding: 0, number: false}}
             style={{cursor: "pointer"}}
             isSelected={index === selectedIndex}
