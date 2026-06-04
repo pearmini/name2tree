@@ -2,6 +2,68 @@
   outline: none;
 }
 
+.forest-own-control {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: monospace;
+  pointer-events: none;
+  transition: width 0.15s ease, height 0.15s ease, background 0.15s ease;
+}
+
+.forest-own-dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #333;
+  flex-shrink: 0;
+}
+
+.forest-own-delete {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+}
+
+.forest-cell:hover .forest-own-control {
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid #333;
+  border-radius: 4px;
+  background: #fefaf1;
+  color: #333;
+  pointer-events: auto;
+}
+
+.forest-cell:hover .forest-own-dot {
+  display: none;
+}
+
+.forest-cell:hover .forest-own-delete {
+  display: flex;
+}
+
+.forest-own-control:active {
+  background: #333;
+  color: #fefaf1;
+}
+
+.forest-status-error {
+  color: #a33;
+}
+
 .menu-container {
   position: fixed;
   right: 20px;

@@ -6,7 +6,7 @@ import {AwesomeQRCode} from "@awesomeqr/react";
 import QRCODE from "./qrcode.png";
 import {downloadPNG, downloadSVG} from "./file.js";
 
-export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
+export function Tree({isAdmin, onAdd, onAddCommunity, addError, isAdding, text, setText, onForest, isMobile}) {
   const PLACEHOLDER = "Type your name or nickname...";
   const DEFAULT_TEXT = "Name To Tree";
   const treeRef = useRef(null);
@@ -43,6 +43,10 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
 
   const handleAdd = () => {
     onAdd(text);
+  };
+
+  const handleAddCommunity = () => {
+    onAddCommunity(text);
   };
 
   const updateInputWidth = (input, value) => {
@@ -249,12 +253,12 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
         ) : (
           <>
             <button
-              onClick={() => {
-                window.open("https://github.com/pearmini/name2tree/edit/main/src/names.json", "_blank");
-              }}
-              onMouseEnter={() => setTooltip("Create a Pull Request to add your name to the Forest!")}
+              onClick={handleAddCommunity}
+              disabled={isAdding}
+              aria-busy={isAdding}
+              onMouseEnter={() => setTooltip("Add your tree to the shared forest!")}
               onMouseLeave={() => setTooltip("")}
-              className="button primary-button"
+              className="button primary-button action-button-add"
               style={{
                 fontSize: "14px",
               }}
@@ -371,12 +375,14 @@ export function Tree({isAdmin, onAdd, text, setText, onForest, isMobile}) {
       )}
       <p
         style={{
-          visibility: tooltip ? "visible" : "hidden",
           marginTop: "24px",
           fontSize: isAdmin ? "18px" : "14px",
+          color: addError ? "#a33" : "inherit",
+          visibility: tooltip || addError ? "visible" : "hidden",
+          minHeight: "1.2em",
         }}
       >
-        {tooltip || "W"}
+        {addError || tooltip || "\u00a0"}
       </p>
     </div>
   );

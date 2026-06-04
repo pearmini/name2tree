@@ -1,9 +1,11 @@
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {saveToLocalStorage} from "./file.js";
 import {TreeItem} from "./TreeItem.jsx";
 import QRCODE from "./qrcode.png";
 import {AwesomeQRCode} from "@awesomeqr/react";
 import {BACKGROUND_COLOR} from "./constants.js";
+import {getBrowserId} from "./lib/browserId.js";
+import {deleteCommunityTree, fetchCommunityTrees, isSupabaseConfigured} from "./lib/treesApi.js";
 
 function TreeModal({name, onClose, isAdmin}) {
   const [showQRCode, setShowQRCode] = useState(false);
@@ -69,15 +71,110 @@ function TreeModal({name, onClose, isAdmin}) {
   );
 }
 
-export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedIndex}) {
+function DeleteIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+      />
+    </svg>
+  );
+}
+
+function ForestTreeCell({entry, isSelected, onClick, onDelete}) {
+  const isOwn = entry.source === "community" && entry.browserId === getBrowserId();
+
+  return (
+    <div className="forest-cell" style={{position: "relative"}}>
+      <TreeItem
+        name={entry.name}
+        onClick={onClick}
+        options={{padding: 0, number: false}}
+        style={{cursor: "pointer"}}
+        isSelected={isSelected}
+      />
+      {isOwn && onDelete && (
+        <button
+          type="button"
+          className="forest-own-control"
+          title="Delete your tree"
+          aria-label="Delete your tree"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <span className="forest-own-dot" aria-hidden="true" />
+          <span className="forest-own-delete" aria-hidden="true">
+            <DeleteIcon />
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function Forest({
+  isAdmin,
+  archiveNames,
+  setArchiveNames,
+  communityTrees,
+  setCommunityTrees,
+  selectedIndex,
+  setSelectedIndex,
+}) {
   const [selectedId, setSelectedId] = useState(null);
+  const [loadState, setLoadState] = useState("idle");
+  const [loadError, setLoadError] = useState("");
+
+  const displayNames = useMemo(
+    () => [...communityTrees, ...archiveNames],
+    [communityTrees, archiveNames],
+  );
+
   const selectedName =
     typeof selectedId === "number"
-      ? names[selectedId]
-      : names.find((name) => name.id === selectedId);
+      ? displayNames[selectedId]
+      : displayNames.find((name) => name.id === selectedId);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    let cancelled = false;
+    setLoadState("loading");
+    setLoadError("");
+    fetchCommunityTrees()
+      .then((trees) => {
+        if (!cancelled) {
+          setCommunityTrees(trees);
+          setLoadState("done");
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setLoadError(err.message ?? "Could not load community trees.");
+          setLoadState("error");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [setCommunityTrees]);
 
   function onClickTree(id, index) {
     setSelectedId(id ?? index);
+  }
+
+  async function onDeleteCommunityTree(id) {
+    if (!confirm("Remove your tree from the forest?")) return;
+    try {
+      await deleteCommunityTree(id);
+      setCommunityTrees((prev) => prev.filter((t) => t.id !== id));
+      setSelectedId(null);
+      setSelectedIndex(-1);
+    } catch (err) {
+      alert(err.message ?? "Could not delete your tree.");
+    }
   }
 
   const onSaveToLocalStorage = (names) => {
@@ -86,16 +183,17 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   };
 
   const onRemoveName = () => {
+    const entry = selectedName;
+    if (!entry || entry.source === "community") return;
     if (confirm("Are you sure you want to remove this tree?")) {
-      const index =
+      const archiveIndex =
         typeof selectedId === "number"
-          ? selectedId
-          : selectedId !== null
-            ? names.findIndex((name) => name.id === selectedId)
-            : 0;
-      const newNames = [...names];
-      newNames.splice(index, 1);
-      setNames(newNames);
+          ? selectedId - communityTrees.length
+          : archiveNames.findIndex((name) => name.id === selectedId);
+      if (archiveIndex < 0) return;
+      const newNames = [...archiveNames];
+      newNames.splice(archiveIndex, 1);
+      setArchiveNames(newNames);
       saveToLocalStorage(newNames);
       setSelectedId(null);
       setSelectedIndex(-1);
@@ -113,7 +211,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   };
 
   const onClearLocalStorage = () => {
-    setNames([]);
+    setArchiveNames([]);
     saveToLocalStorage([]);
     alert("Cleared local storage.");
   };
@@ -124,9 +222,11 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
     file.onchange = (e) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const names = JSON.parse(e.target.result);
-        console.log(names);
-        setNames(names);
+        const names = JSON.parse(e.target.result).map((entry) => ({
+          ...entry,
+          source: "archive",
+        }));
+        setArchiveNames(names);
       };
       reader.readAsText(e.target.files[0]);
     };
@@ -134,19 +234,14 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
   };
 
   useEffect(() => {
-    // cmd + s: save to local storage
-    // cmd + d: download to file
-    // cmd + c: clear local storage
-    // cmd + z: remove the first name
-    // cmd + u: upload file
     const keydown = (e) => {
       if (!isAdmin) return;
       if (e.key === "s") {
         e.preventDefault();
-        onSaveToLocalStorage(names);
+        onSaveToLocalStorage(archiveNames);
       } else if (e.key === "d") {
         e.preventDefault();
-        onDownloadToFile(names);
+        onDownloadToFile(archiveNames);
       } else if (e.key === "c") {
         e.preventDefault();
         onClearLocalStorage();
@@ -160,7 +255,7 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
     };
     window.addEventListener("keydown", keydown);
     return () => window.removeEventListener("keydown", keydown);
-  }, [names, selectedId]);
+  }, [archiveNames, communityTrees, selectedId, selectedName]);
 
   return (
     <>
@@ -178,6 +273,16 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
           }
         `}
       </style>
+      {loadState === "loading" && (
+        <p className="forest-status" style={{padding: "12px 100px 0", margin: 0}}>
+          Loading community trees…
+        </p>
+      )}
+      {loadState === "error" && (
+        <p className="forest-status forest-status-error" style={{padding: "12px 100px 0", margin: 0}}>
+          {loadError}
+        </p>
+      )}
       <div
         className="forest-grid"
         style={{
@@ -190,18 +295,23 @@ export function Forest({isAdmin, names, setNames, selectedIndex, setSelectedInde
           overflow: "auto",
         }}
       >
-        {names.map((name, index) => (
-          <TreeItem
-            key={name.id || name.name || index}
-            name={name.name}
-            onClick={() => onClickTree(name.id, index)}
-            options={{padding: 0, number: false}}
-            style={{cursor: "pointer"}}
+        {displayNames.map((entry, index) => (
+          <ForestTreeCell
+            key={entry.source === "community" ? entry.id : entry.id || entry.name || index}
+            entry={entry}
             isSelected={index === selectedIndex}
+            onClick={() => onClickTree(entry.id, index)}
+            onDelete={
+              entry.source === "community" && entry.browserId === getBrowserId()
+                ? () => onDeleteCommunityTree(entry.id)
+                : undefined
+            }
           />
         ))}
       </div>
-      {selectedName && <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} isAdmin={isAdmin} />}
+      {selectedName && (
+        <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} isAdmin={isAdmin} />
+      )}
     </>
   );
 }

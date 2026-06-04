@@ -57,8 +57,8 @@ The work also expands into Tree Harmony and the procedural landscape [{Mountains
 | Route | Purpose |
 | --- | --- |
 | `/` | Main Name2Tree generator. Type text, preview the tree, download it, or add it to the forest. |
-| `/forest` | Collective archive of submitted trees, with click-to-zoom details and admin tools. |
-| `/viz` | Follow-up visualizations of the forest as a swarm, cloud, or grid. |
+| `/forest` | Collective forest: community trees from Supabase (newest first), then the bundled archive from `names.json`. Click to zoom; delete your own community trees on hover. |
+| `/viz` | Follow-up visualizations of the **archive** (`names.json` only) as a swarm, cloud, or grid. |
 | `/write` | APack writing view for stamp-style text generation. |
 | `/about` | Project background and explanation. |
 | `/?text=...` | Download page for a specific tree, used by the QR-code flow. |
@@ -74,6 +74,25 @@ Admin mode is available by appending `?admin=true` to the app URL. In admin mode
 - [Charming.js](https://charmingjs.org/) helpers for SVG construction.
 - `hachure-fill`, `points-on-path`, and custom SVG geometry for plotter-style output.
 - `@awesomeqr/react` for QR-code generation.
+- [Supabase](https://supabase.com/) for community-submitted trees on `/forest` (shared project; one table per app).
+
+## Community trees (Supabase)
+
+Public visitors can add a tree from `/` without opening a GitHub PR. Submissions are stored in a Supabase `trees` table and shown at the top of `/forest`. The installation archive in `names.json` still ships with the app and appears below community trees. `/viz` uses only `names.json`.
+
+Ownership uses a stable browser ID in `localStorage` (`name2tree_browser_id`). Your trees show a small mark and a **Delete** button on hover. Names are validated client-side (length, no links/email, profanity filter).
+
+### Supabase setup
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. In the SQL Editor, run [`supabase/trees.sql`](supabase/trees.sql).
+3. Copy the project URL and anon (publishable) key.
+4. Add environment variables (local and Vercel):
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+5. Copy [`.env.example`](.env.example) to `.env.local` for local development (`.env.local` is gitignored).
+
+Without these variables, the app still runs; adding community trees shows a friendly error.
 
 ## Getting Started
 
@@ -126,6 +145,9 @@ src/
   APack.jsx        Stamp-style text component
   Download.jsx     QR-linked download page
   names.json       Seed archive data for the forest
+  lib/             Supabase client, validation, community trees API
+supabase/
+  trees.sql        Postgres schema and RLS for community trees
 ```
 
 ## License

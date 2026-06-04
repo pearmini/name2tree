@@ -11,7 +11,9 @@
     "clean": "node scripts/clean.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
     "@awesomeqr/react": "0.1.2-rc.0",
+    "bad-words": "^4.0.0",
     "@observablehq/plot": "^0.6.17",
     "apackjs": "0.0.1",
     "charmingjs": "^0.0.17",

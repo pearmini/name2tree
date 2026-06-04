@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Tree} from "./Tree.jsx";
 import {Forest} from "./Forest.jsx";
 import {APack} from "./APack.jsx";
@@ -11,11 +11,11 @@ import {saveToLocalStorage} from "./file.js";
 import data from "./names.json";
 import "./App.css";
 import {Routes, Route, useLocation, useNavigate, Link} from "react-router-dom";
+import {validateName} from "./lib/validateName.js";
+import {addCommunityTree, isSupabaseConfigured} from "./lib/treesApi.js";
 
 function initData() {
-  // const localNames = localStorage.getItem("names");
-  // const names = localNames && JSON.parse(localNames);
-  return data;
+  return data.map((entry) => ({...entry, source: "archive"}));
 }
 
 function uid() {
@@ -31,24 +31,60 @@ function App() {
     return <Download text={qrCodeText} />;
   }
 
-  const [text, setText] = useState("");
-  const [names, setNames] = useState(initData());
+  const [text, setTextState] = useState("");
+  const [archiveNames, setArchiveNames] = useState(initData);
+  const [communityTrees, setCommunityTrees] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [addError, setAddError] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Show menu only on tree page
+  const setText = (value) => {
+    setTextState(value);
+    setAddError("");
+  };
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setIsAdding(false);
+    }
+  }, [location.pathname]);
+
   const showMenu = location.pathname === "/";
   const showBack = location.pathname !== "/";
   const showBackMiddle = location.pathname !== "/viz";
 
   function onAdd(text) {
-    const newName = {name: text, id: uid(), createdAt: new Date()};
-    const newNames = [newName, ...names];
-    setNames(newNames);
+    const newName = {name: text, id: uid(), createdAt: new Date(), source: "archive"};
+    const newNames = [newName, ...archiveNames];
+    setArchiveNames(newNames);
     setSelectedIndex(0);
     navigate("/forest");
     saveToLocalStorage(newNames);
+  }
+
+  async function onAddCommunity(text) {
+    setAddError("");
+    const validation = validateName(text);
+    if (!validation.ok) {
+      setAddError(validation.error);
+      return;
+    }
+    if (!isSupabaseConfigured()) {
+      setAddError("Forest is not connected yet. Please try again later.");
+      return;
+    }
+    setIsAdding(true);
+    try {
+      const tree = await addCommunityTree(validation.name);
+      setCommunityTrees((prev) => [tree, ...prev]);
+      setSelectedIndex(0);
+      navigate("/forest");
+    } catch (err) {
+      setAddError(err.message ?? "Could not add your tree. Please try again.");
+      setIsAdding(false);
+    }
   }
 
   return (
@@ -65,6 +101,9 @@ function App() {
             <Tree
               isAdmin={isAdmin}
               onAdd={onAdd}
+              onAddCommunity={onAddCommunity}
+              addError={addError}
+              isAdding={isAdding}
               text={text}
               setText={setText}
               onWrite={() => navigate("/write")}
@@ -78,9 +117,10 @@ function App() {
           element={
             <Forest
               isAdmin={isAdmin}
-              onAdd={onAdd}
-              names={names}
-              setNames={setNames}
+              archiveNames={archiveNames}
+              setArchiveNames={setArchiveNames}
+              communityTrees={communityTrees}
+              setCommunityTrees={setCommunityTrees}
               selectedIndex={selectedIndex}
               setSelectedIndex={setSelectedIndex}
             />
@@ -88,10 +128,13 @@ function App() {
         />
         <Route path="/write" element={<Writing isAdmin={isAdmin} />} />
         <Route path="/about" element={<About isAdmin={isAdmin} />} />
-        <Route path="/viz" element={<Viz names={names} />} />
+        <Route path="/viz" element={<Viz names={archiveNames} />} />
       </Routes>
       {showMenu && (
         <div className="menu-container">
+          <Link to="/forest" style={{textDecoration: "none"}}>
+            <APack text="Forest" cellSize={50} />
+          </Link>
           <a
             href="https://landscape.bairui.dev/"
             target="_blank"
@@ -100,9 +143,6 @@ function App() {
           >
             <APack text="Landscape" cellSize={50} />
           </a>
-          <Link to="/forest" style={{textDecoration: "none"}}>
-            <APack text="Forest" cellSize={50} />
-          </Link>
           <Link to="/viz" style={{textDecoration: "none"}}>
             <APack text="Viz" cellSize={50} />
           </Link>
