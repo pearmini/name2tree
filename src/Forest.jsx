@@ -105,7 +105,9 @@ function ForestTreeCell({entry, isSelected, onClick, onDelete}) {
             onDelete();
           }}
         >
-          <span className="forest-own-dot" aria-hidden="true" />
+          <span className="forest-own-dot" aria-hidden="true">
+            *
+          </span>
           <span className="forest-own-delete" aria-hidden="true">
             <DeleteIcon />
           </span>
