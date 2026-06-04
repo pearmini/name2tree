@@ -82,6 +82,21 @@ function DeleteIcon() {
   );
 }
 
+function ForestSection({title, description, count, children}) {
+  return (
+    <section className="forest-section">
+      <header className="forest-section-header">
+        <h2 className="forest-section-title">{title}</h2>
+        <p className="forest-section-description">{description}</p>
+        <p className="forest-section-count">
+          {count} {count === 1 ? "tree" : "trees"}
+        </p>
+      </header>
+      <div className="forest-grid">{children}</div>
+    </section>
+  );
+}
+
 function ForestTreeCell({entry, isSelected, onClick, onDelete}) {
   const isOwn = entry.source === "community" && entry.browserId === getBrowserId();
 
@@ -218,6 +233,25 @@ export function Forest({
     alert("Cleared local storage.");
   };
 
+  function renderTreeCells(entries, indexOffset) {
+    return entries.map((entry, index) => {
+      const globalIndex = indexOffset + index;
+      return (
+        <ForestTreeCell
+          key={entry.source === "community" ? entry.id : entry.id || entry.name || globalIndex}
+          entry={entry}
+          isSelected={globalIndex === selectedIndex || entry.id === selectedId}
+          onClick={() => onClickTree(entry.id, globalIndex)}
+          onDelete={
+            entry.source === "community" && entry.browserId === getBrowserId()
+              ? () => onDeleteCommunityTree(entry.id)
+              : undefined
+          }
+        />
+      );
+    });
+  }
+
   const onUploadFile = () => {
     const file = document.createElement("input");
     file.type = "file";
@@ -285,31 +319,23 @@ export function Forest({
           {loadError}
         </p>
       )}
-      <div
-        className="forest-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-          gap: "0px",
-          padding: "0px 100px 100px 100px",
-          width: "100vw",
-          height: "100vh",
-          overflow: "auto",
-        }}
-      >
-        {displayNames.map((entry, index) => (
-          <ForestTreeCell
-            key={entry.source === "community" ? entry.id : entry.id || entry.name || index}
-            entry={entry}
-            isSelected={index === selectedIndex}
-            onClick={() => onClickTree(entry.id, index)}
-            onDelete={
-              entry.source === "community" && entry.browserId === getBrowserId()
-                ? () => onDeleteCommunityTree(entry.id)
-                : undefined
-            }
-          />
-        ))}
+      <div className="forest-page">
+        {communityTrees.length > 0 && (
+          <ForestSection
+            title="Community Forest"
+            description="Trees added online by visitors. Type your name on the home page and press Add to Forest. Hover your tree (marked with *) to delete it."
+            count={communityTrees.length}
+          >
+            {renderTreeCells(communityTrees, 0)}
+          </ForestSection>
+        )}
+        <ForestSection
+          title="ITP Spring Show 2025"
+          description="Trees from Find Trees in Names at NYU ITP — names typed at the show and kept in the installation archive."
+          count={archiveNames.length}
+        >
+          {renderTreeCells(archiveNames, communityTrees.length)}
+        </ForestSection>
       </div>
       {selectedName && (
         <TreeModal name={selectedName.name} onClose={() => setSelectedId(null)} isAdmin={isAdmin} />
