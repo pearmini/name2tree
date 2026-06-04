@@ -1,155 +1,166 @@
 # Name2Tree
 
-Name2Tree is a generative art app that turns text into deterministic tree drawings. It began as the ITP Spring Show 2025 project [Find Trees in Names: What if We are Trees?](https://bairui.dev/name2tree), where visitors typed a name, watched a tree grow, added it to a shared forest, downloaded it through a QR flow, and printed it as a physical keepsake. The project explores digital identity, authorship, and the natural dimension of code by connecting a simple algorithm to something personal: a name.
+**Type a name. Grow a tree. Leave it in the forest.**
 
-![Find Trees in Names](./img/readme-main.webp)
+[![Live app](https://img.shields.io/badge/app-tree.bairui.dev-141414?style=for-the-badge)](https://tree.bairui.dev/)
+[![ITP Spring Show 2025](https://img.shields.io/badge/ITP-Spring%20Show%202025-f6f6f6?style=for-the-badge&color=141414)](https://bairui.dev/name2tree)
 
-## Links
+<img src="./img/readme-main.webp" width="720" alt="Find Trees in Names — Name2Tree" />
 
-- Live app: [tree.bairui.dev](https://tree.bairui.dev/)
-- Project documentation: [bairui.dev/name2tree](https://bairui.dev/name2tree)
-- Related landscape: [{Mountains, Trees, Names}*](https://landscape.bairui.dev/)
-- Related sound sketch: [Tree Harmony](https://music.bairui.dev/tree)
-- APack: [apack.bairui.dev](https://apack.bairui.dev/)
+Name2Tree is a generative art app that turns text into deterministic tree drawings. It began as the ITP Spring Show 2025 project [Find Trees in Names: What if We are Trees?](https://bairui.dev/name2tree), where visitors typed a name, watched a tree grow, added it to a shared forest, downloaded it through a QR flow, and printed it as a physical keepsake.
 
-## Why Is It
+**You are welcome here.** Type your name or a short phrase on the [live app](https://tree.bairui.dev/), press **Add to Forest**, and your tree joins the community grove at the top of the forest — no GitHub pull request, just a moment between you and the algorithm.
 
-Chinese characters often carry semantic cues beyond their phonetic value. In Bairui Su's Chinese name, the first character of the last name, `柏`, means cypress tree. This project starts from that personal connection and asks what trees might be hidden in other names.
+> *The same words always grow the same tree. What will yours look like?*
 
-Name2Tree treats names and short text as both identity and data. By turning text into natural forms, it makes the relationship between code, language, and authorship visible, then extends the result into a shared forest, visualizations, sound, and landscape.
+[**Try it live →**](https://tree.bairui.dev/) · [**Explore the forest →**](https://tree.bairui.dev/forest) · [**Project story →**](https://bairui.dev/name2tree)
 
-## What It Does
+## What it does
 
-- Converts a name or any short text into ASCII/Unicode code digits.
-- Builds a tree breadth-first, where each digit becomes the number of children for the current node.
-- Uses a deterministic seeded generator, so the same input always creates the same tree.
-- Balances branch angles by each branch's leaf count to reduce overlap and make the tree feel natural.
-- Converts degenerate digit runs, such as leading `1`s or trailing `0`s, into flower-like mathematical roses so edge cases still look intentional.
-- Adds an APack stamp-style signature that writes English text in a Chinese-character-like grid.
-- Supports saving, downloading, QR-code retrieval, and collective forest visualizations.
+1. **Type** — Enter a name, nickname, or any short text (validated for friendly content).
+2. **Grow** — ASCII/Unicode digits drive a breadth-first tree; the same input always yields the same drawing.
+3. **Add** — Community trees save to Supabase and appear first on [`/forest`](https://tree.bairui.dev/forest); the installation archive from `names.json` follows below.
+4. **Keep** — Download PNG or SVG, scan a QR code for a print-ready page, or open collective views on `/viz`.
+5. **Return** — Your community trees show a small mark; hover the card to reveal delete (only yours).
+
+Degenerate digit runs become intentional flower-like roses. An APack stamp can sign the tree in a Chinese-character-like grid. Admin mode (`?admin=true`) still supports curating the bundled archive.
 
 ![Name2Tree conversion process](./img/readme-steps.webp)
 
 ## Examples
 
-These are trees generated from different text inputs. Notice that the input is not limited to names; any text can be converted into a tree, including Chinese poems and numbers.
+These are trees generated from different text inputs. The input is not limited to names — poems, phrases, and numbers all become trees.
 
 | ![Example tree 1](./img/readme-tree1.webp) | ![Example tree 2](./img/readme-tree2.webp) | ![Example tree 3](./img/readme-tree3.webp) |
 | --- | --- | --- |
 | ![Example tree 4](./img/readme-tree4.webp) | ![Example tree 5](./img/readme-tree5.webp) | ![Example tree 6](./img/readme-tree6.webp) |
 
-## Visualizations
+## Why it exists
 
-The `/viz` route includes three ways to explore the collected trees from the installation:
+In Bairui Su's Chinese name, the character `柏` in the family name means cypress tree. That personal link sparked a question: what trees are hidden in other names?
 
-- Swarm: a beeswarm-like timeline for exploring submitted trees temporally.
-- Cloud: an organic packed layout for seeing the forest as a collective texture.
-- Grid: a sortable overview by time, name, or digit-derived score.
+Name2Tree treats language as both identity and data. By turning text into natural form, it makes code, authorship, and language visible — then extends into a shared forest, [swarm/cloud/grid visualizations](https://tree.bairui.dev/viz), [Tree Harmony](https://music.bairui.dev/tree), and the procedural landscape [{Mountains, Trees, Names}*](https://landscape.bairui.dev/).
 
 ![Tree swarm visualization](./img/readme-swarm.webp)
 
-The work also expands into Tree Harmony and the procedural landscape [{Mountains, Trees, Names}*](https://landscape.bairui.dev/).
-
 ![Procedural landscape made from Name2Tree trees](./img/readme-landscape.webp)
 
-## App Routes
+## How it works
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Main Name2Tree generator. Type text, preview the tree, download it, or add it to the forest. |
-| `/forest` | Collective forest: community trees from Supabase (newest first), then the bundled archive from `names.json`. Click to zoom; delete your own community trees on hover. |
-| `/viz` | Follow-up visualizations of the **archive** (`names.json` only) as a swarm, cloud, or grid. |
-| `/write` | APack writing view for stamp-style text generation. |
-| `/about` | Project background and explanation. |
-| `/?text=...` | Download page for a specific tree, used by the QR-code flow. |
-
-Admin mode is available by appending `?admin=true` to the app URL. In admin mode, the forest view supports shortcuts for saving, downloading, clearing, removing, and uploading `names.json` data.
-
-## Tech Stack
-
-- [React](https://react.dev/) and [Vite](https://vite.dev/) for the web app.
-- [D3](https://d3js.org/) for hierarchy, scales, random seeds, zooming, and layout work.
-- [Observable Plot](https://observablehq.com/plot/) for visualization support.
-- [APack](https://apack.bairui.dev/) through `apackjs` for the name stamp.
-- [Charming.js](https://charmingjs.org/) helpers for SVG construction.
-- `hachure-fill`, `points-on-path`, and custom SVG geometry for plotter-style output.
-- `@awesomeqr/react` for QR-code generation.
-- [Supabase](https://supabase.com/) for community-submitted trees on `/forest` (shared project; one table per app).
-
-## Community trees (Supabase)
-
-Public visitors can add a tree from `/` without opening a GitHub PR. Submissions are stored in a Supabase `trees` table and shown at the top of `/forest`. The installation archive in `names.json` still ships with the app and appears below community trees. `/viz` uses only `names.json`.
-
-Ownership uses a stable browser ID in `localStorage` (`name2tree_browser_id`). Your trees show a small mark and a **Delete** button on hover. Names are validated client-side (length, no links/email, profanity filter).
-
-### Supabase setup
-
-1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run [`supabase/trees.sql`](supabase/trees.sql).
-3. Copy the project URL and anon (publishable) key.
-4. Add environment variables (local and Vercel):
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-5. Copy [`.env.example`](.env.example) to `.env.local` for local development (`.env.local` is gitignored).
-
-Without these variables, the app still runs; adding community trees shows a friendly error.
-
-## Getting Started
-
-Install dependencies:
-
-```bash
-pnpm install
+```
+Your text
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Digitize (ASCII / Unicode codes)   │
+│  Seeded RNG → breadth-first tree    │
+│  Branch balance, roses for 1…0 runs │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  drawTree.js → SVG (Charming, Rough)│
+│  Optional APack stamp, QR download  │
+└─────────────────────────────────────┘
+    │
+    ├─ Add to Forest ──► Supabase `trees` (community, newest first)
+    │
+    └─ Archive ─────────► names.json (ITP show + bundled history, /viz only)
 ```
 
-Start the development server:
+**Community layer** (`src/lib/`) — browser ID in `localStorage`, client validation, Supabase insert/delete with RLS. **Forest gallery** (`Forest.jsx`) — React grid of tree thumbnails. **Viz** (`drawForest.js`, D3, Observable Plot) — swarm, cloud, and grid layouts over the archive only.
+
+## Tech stack
+
+| Layer | Tools |
+|-------|-------|
+| UI | React 19, React Router, Vite |
+| Drawing | D3, Observable Plot, Charming.js, Rough.js, `hachure-fill` |
+| Stamp & QR | [APack](https://apack.bairui.dev/) (`apackjs`), `@awesomeqr/react` |
+| Community forest | [Supabase](https://supabase.com/) — Postgres `trees` table, `@supabase/supabase-js`, Row Level Security |
+| Validation | `bad-words` profanity filter, length and URL/email checks (client-side) |
+| Deploy | Vercel |
+
+Community add/delete uses the Supabase **anon** key in the browser (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). Shared Supabase project `bairui-studio` can host more tables later (e.g. `faces` for [BioGlyph](https://bio.bairui.dev/)).
+
+## Routes
+
+| Path | Description |
+|------|-------------|
+| `/` | Generate a tree; add to the community forest or download |
+| `/forest` | Community trees (Supabase) then archive (`names.json`); click to zoom |
+| `/viz` | Swarm, cloud, or grid — **archive only** |
+| `/write` | APack stamp writing (`?admin=true`) |
+| `/about` | Project background |
+| `/?text=...` | QR-linked download page for one tree |
+
+## Getting started
+
+**Requirements:** Node.js 18+, pnpm
 
 ```bash
+git clone https://github.com/pearmini/name2tree.git
+cd name2tree
+pnpm install
+cp .env.example .env.local   # optional: enable Add to Forest via Supabase
 pnpm dev
 ```
 
-Build for production:
+Open [http://localhost:5173](http://localhost:5173). Without `.env.local`, the app runs; community add shows a friendly “not connected” message.
 
 ```bash
-pnpm build
+pnpm build     # production build
+pnpm preview   # preview production build
+pnpm lint      # ESLint
+pnpm clean     # dedupe names.json
 ```
 
-Preview the production build:
+### Supabase setup (community forest)
 
-```bash
-pnpm preview
+1. Run [`supabase/trees.sql`](supabase/trees.sql) in the Supabase SQL Editor.
+2. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local` and on Vercel.
+
+## Project structure
+
+```
+name2tree/
+├── src/
+│   ├── App.jsx           # Routes, archive vs community state
+│   ├── Tree.jsx          # Main generator + Add to Forest
+│   ├── Forest.jsx        # Gallery, own-tree delete on hover
+│   ├── drawTree.js       # Text → tree algorithm
+│   ├── drawForest.js     # Swarm / cloud / grid layouts
+│   ├── Viz.jsx           # Visualization route
+│   ├── names.json        # Bundled installation archive
+│   └── lib/
+│       ├── supabase.js   # Client + browser ID header
+│       ├── treesApi.js   # Fetch / add / delete community trees
+│       └── validateName.js
+├── supabase/
+│   └── trees.sql         # Schema + RLS
+└── img/
 ```
 
-Run linting:
+Admin shortcuts on `/forest` with `?admin=true`: save, download, clear, remove, upload `names.json` (archive only).
 
-```bash
-pnpm lint
-```
+## Related work
 
-Clean generated artifacts:
-
-```bash
-pnpm clean
-```
-
-## Project Structure
-
-```text
-src/
-  App.jsx          Route setup, shared state, and navigation
-  Tree.jsx         Main text-to-tree interaction and download modal
-  drawTree.js      Core deterministic text-to-tree SVG algorithm
-  Forest.jsx       Collective forest archive and admin interactions
-  drawForest.js    Forest layouts, zooming, cloud/grid/swarm rendering
-  Viz.jsx          Visualization controls and route state
-  APack.jsx        Stamp-style text component
-  Download.jsx     QR-linked download page
-  names.json       Seed archive data for the forest
-  lib/             Supabase client, validation, community trees API
-supabase/
-  trees.sql        Postgres schema and RLS for community trees
-```
+- [tree.bairui.dev](https://tree.bairui.dev/) — live app
+- [bairui.dev/name2tree](https://bairui.dev/name2tree) — documentation
+- [{Mountains, Trees, Names}*](https://landscape.bairui.dev/) — landscape
+- [Tree Harmony](https://music.bairui.dev/tree) — sound
+- [BioGlyph](https://bio.bairui.dev/) — one-line faces (sibling project on shared Supabase)
 
 ## License
 
-MIT
+[MIT](./LICENSE)
+
+<p align="center">
+  <a href="https://tree.bairui.dev/"><strong>tree.bairui.dev</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/pearmini/name2tree">Source</a>
+  &nbsp;·&nbsp;
+  <a href="https://bairui.dev/">Blog</a>
+</p>
+
+<p align="center"><em>What if we are trees?</em></p>
