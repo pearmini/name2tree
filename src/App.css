@@ -116,6 +116,25 @@
   gap: 0;
 }
 
+.tree-page {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.tree-visual {
+  width: 480px;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 80%;
+}
+
 .menu-container {
   position: fixed;
   right: 20px;
@@ -138,25 +157,45 @@
 }
 
 @media (max-width: 768px) {
+  .tree-page {
+    height: 100vh;
+    height: 100dvh;
+    justify-content: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 140px 16px 48px;
+  }
+
+  .tree-visual {
+    width: min(72vw, 320px);
+    height: min(72vw, 320px);
+    max-width: none;
+    flex-shrink: 0;
+  }
+
   .menu-container {
-    top: 50px;
+    top: max(24px, env(safe-area-inset-top, 0px));
     right: auto;
     left: 50%;
     transform: translateX(-50%);
     flex-direction: row;
     bottom: auto;
+    z-index: 10;
   }
 
   .action-buttons {
     flex-direction: column !important;
+    flex-shrink: 0;
+    padding-bottom: 24px;
   }
 
   .input-container {
-    margin-top: 200px;
+    margin-top: 28px;
+    margin-bottom: 12px;
   }
 
   .forest-page {
-    padding: 80px 20px 20px !important;
+    padding: calc(80px + env(safe-area-inset-top, 0px)) 20px 20px !important;
   }
 
   .forest-grid {
@@ -176,14 +215,16 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    height: calc(60px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
     background-color: #fefaf1;
     border-bottom: 1.5px solid #000;
     z-index: 999;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 0 20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .home-button-container {
