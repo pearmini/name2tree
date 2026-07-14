@@ -7,7 +7,7 @@ import QRCODE from "./qrcode.png";
 import {downloadPNG, downloadSVG} from "./file.js";
 
 export function Tree({isAdmin, onAdd, onAddCommunity, addError, isAdding, text, setText, onForest, isMobile}) {
-  const PLACEHOLDER = "Type your name or nickname...";
+  const PLACEHOLDER = "Type Your Name...";
   const DEFAULT_TEXT = "Name To Tree";
   const treeRef = useRef(null);
   const inputRef = useRef(null);
