@@ -34,7 +34,7 @@ function App() {
   const [text, setTextState] = useState("");
   const [archiveNames, setArchiveNames] = useState(initData);
   const [communityTrees, setCommunityTrees] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [justAddedId, setJustAddedId] = useState(null);
   const [addError, setAddError] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const location = useLocation();
@@ -59,7 +59,7 @@ function App() {
     const newName = {name: text, id: uid(), createdAt: new Date(), source: "archive"};
     const newNames = [newName, ...archiveNames];
     setArchiveNames(newNames);
-    setSelectedIndex(0);
+    setJustAddedId(newName.id);
     navigate("/forest");
     saveToLocalStorage(newNames);
   }
@@ -79,7 +79,7 @@ function App() {
     try {
       const tree = await addCommunityTree(validation.name);
       setCommunityTrees((prev) => [tree, ...prev]);
-      setSelectedIndex(0);
+      setJustAddedId(tree.id);
       navigate("/forest");
     } catch (err) {
       setAddError(err.message ?? "Could not add your tree. Please try again.");
@@ -121,8 +121,8 @@ function App() {
               setArchiveNames={setArchiveNames}
               communityTrees={communityTrees}
               setCommunityTrees={setCommunityTrees}
-              selectedIndex={selectedIndex}
-              setSelectedIndex={setSelectedIndex}
+              justAddedId={justAddedId}
+              setJustAddedId={setJustAddedId}
             />
           }
         />

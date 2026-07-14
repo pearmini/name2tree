@@ -1,7 +1,7 @@
 import {useEffect, useRef} from "react";
 import {tree} from "./drawTree.js";
 
-export function TreeItem({name, onClick, options = {}, style = {}, isSelected = false}) {
+export function TreeItem({name, onClick, options = {}, style = {}, animateEnter = false}) {
   const treeRef = useRef(null);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export function TreeItem({name, onClick, options = {}, style = {}, isSelected = 
       ref={treeRef}
       style={{
         ...style,
-        animation: isSelected ? "fadeIn 1.5s ease-in-out" : "none",
+        animation: animateEnter ? "fadeIn 1.5s ease-in-out" : undefined,
       }}
       onClick={onClick}
     />
