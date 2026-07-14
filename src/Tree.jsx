@@ -134,15 +134,7 @@ export function Tree({isAdmin, onAdd, onAddCommunity, addError, isAdding, text, 
   }
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <div className="tree-page">
       <div
         className="input-container"
         style={{
@@ -180,16 +172,7 @@ export function Tree({isAdmin, onAdd, onAddCommunity, addError, isAdding, text, 
           </p>
         </div>
       </div>
-      <div
-        style={{
-          width: 480,
-          height: 480,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          maxWidth: "80%",
-        }}
-      >
+      <div className="tree-visual">
         <div
           ref={treeRef}
           style={{
