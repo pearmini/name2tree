@@ -97,7 +97,7 @@ function ForestSection({title, description, count, children}) {
   );
 }
 
-function ForestTreeCell({entry, isSelected, onClick, onDelete}) {
+function ForestTreeCell({entry, onClick, onDelete, animateEnter = false}) {
   const isOwn = entry.source === "community" && entry.browserId === getBrowserId();
 
   return (
@@ -107,7 +107,7 @@ function ForestTreeCell({entry, isSelected, onClick, onDelete}) {
         onClick={onClick}
         options={{padding: 0, number: false}}
         style={{cursor: "pointer"}}
-        isSelected={isSelected}
+        animateEnter={animateEnter}
       />
       {isOwn && onDelete && (
         <button
@@ -138,12 +138,18 @@ export function Forest({
   setArchiveNames,
   communityTrees,
   setCommunityTrees,
-  selectedIndex,
-  setSelectedIndex,
+  justAddedId,
+  setJustAddedId,
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const [loadState, setLoadState] = useState("idle");
   const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    if (!justAddedId) return;
+    const timer = setTimeout(() => setJustAddedId(null), 1500);
+    return () => clearTimeout(timer);
+  }, [justAddedId, setJustAddedId]);
 
   const displayNames = useMemo(
     () => [...communityTrees, ...archiveNames],
@@ -188,7 +194,6 @@ export function Forest({
       await deleteCommunityTree(id);
       setCommunityTrees((prev) => prev.filter((t) => t.id !== id));
       setSelectedId(null);
-      setSelectedIndex(-1);
     } catch (err) {
       alert(err.message ?? "Could not delete your tree.");
     }
@@ -213,7 +218,6 @@ export function Forest({
       setArchiveNames(newNames);
       saveToLocalStorage(newNames);
       setSelectedId(null);
-      setSelectedIndex(-1);
     }
   };
 
@@ -240,7 +244,7 @@ export function Forest({
         <ForestTreeCell
           key={entry.source === "community" ? entry.id : entry.id || entry.name || globalIndex}
           entry={entry}
-          isSelected={globalIndex === selectedIndex || entry.id === selectedId}
+          animateEnter={justAddedId != null && entry.id === justAddedId}
           onClick={() => onClickTree(entry.id, globalIndex)}
           onDelete={
             entry.source === "community" && entry.browserId === getBrowserId()
